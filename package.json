@@ -1,0 +1,29 @@
+{
+  "name": "super-tennis",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "overrides": {
+    "react": "19.1.0",
+    "@types/react": "~19.1.0"
+  },
+  "scripts": {
+    "mobile": "yarn workspace @super-tennis/mobile",
+    "server": "yarn workspace @super-tennis/server",
+    "dev:server": "yarn workspace @super-tennis/server dev",
+    "dev:mobile": "yarn workspace @super-tennis/mobile start",
+    "dev": "concurrently \"yarn dev:server\" \"yarn dev:mobile\"",
+    "db:push": "yarn workspace @super-tennis/server db:push",
+    "db:studio": "yarn workspace @super-tennis/server db:studio"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

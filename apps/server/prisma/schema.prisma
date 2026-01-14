@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// 用户模型
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?  @unique
+  avatar    String?
+  level     Float    @default(3.0)  // 网球水平 2.0-6.0
+  rating    Int      @default(1200) // ELO rating
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 比赛模型
+model Match {
+  id            String   @id @default(cuid())
+
+  // 球员信息
+  player1Name   String
+  player2Name   String
+  player1Id     String?  // 可选关联用户
+  player2Id     String?
+
+  // 比赛设置
+  matchType     String   // singles, doubles
+  setFormat     String   // one, three, tiebreak10
+  useTiebreak   Boolean  @default(true)
+  useAdvantage  Boolean  @default(true)
+
+  // 比分数据 (JSON 存储)
+  player1Sets   String   @default("[0]")  // JSON array
+  player2Sets   String   @default("[0]")
+  player1Points Int      @default(0)
+  player2Points Int      @default(0)
+  currentSet    Int      @default(0)
+
+  // 比赛状态
+  isFinished    Boolean  @default(false)
+  winner        Int?     // 1 or 2
+  duration      Int?     // 比赛时长（秒）
+
+  // 视频相关
+  videoPath     String?
+
+  // 统计数据 (JSON)
+  stats         String?  // JSON object
+
+  // 时间戳
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  finishedAt    DateTime?
+}
+
+// 俱乐部模型 (V2)
+model Club {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  avatar      String?
+  location    String?
+  memberCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 俱乐部成员 (V2)
+model ClubMember {
+  id        String   @id @default(cuid())
+  clubId    String
+  userId    String
+  role      String   @default("member") // admin, member
+  joinedAt  DateTime @default(now())
+
+  @@unique([clubId, userId])
+}
+
+// 好友关系
+model Friendship {
+  id          String   @id @default(cuid())
+  userId      String   // 发起者
+  friendId    String   // 好友
+  status      String   @default("pending") // pending, accepted, blocked
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, friendId])
+}
+
+// 比赛视频
+model MatchVideo {
+  id           String   @id @default(cuid())
+  matchId      String
+  userId       String
+  filePath     String
+  duration     Int?     // 视频时长（秒）
+  fileSize     Int?     // 文件大小（bytes）
+  thumbnailPath String?
+  isHighlight  Boolean  @default(false) // 是否为精彩集锦
+  createdAt    DateTime @default(now())
+}
+
+// 精彩瞬间（从视频中截取）
+model Highlight {
+  id            String   @id @default(cuid())
+  videoId       String   // 关联视频
+  matchId       String   // 关联比赛
+  userId        String   // 所属用户
+  startTime     Int      // 开始时间（毫秒）
+  endTime       Int      // 结束时间（毫秒）
+  type          String   @default("other") // ace, winner, rally, dispute, other
+  title         String?
+  description   String?
+  thumbnailPath String?
+  createdAt     DateTime @default(now())
+}
+
+// 通知
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   // 接收者
+  type      String   // friend_request, match_invite, match_reminder, system
+  title     String
+  body      String
+  data      String?  // JSON 额外数据
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// 比赛邀请
+model MatchInvite {
+  id          String   @id @default(cuid())
+  inviterId   String   // 邀请者
+  inviteeId   String   // 被邀请者
+  matchTime   DateTime // 比赛时间
+  location    String?  // 比赛地点
+  message     String?  // 邀请留言
+  status      String   @default("pending") // pending, accepted, declined
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 设备推送 token
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String   // ios, android
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 排行榜历史记录
+model RatingHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  rating    Int      // 当时的 ELO 分数
+  matchId   String?  // 导致变化的比赛
+  change    Int      // 分数变化 (+/-)
+  createdAt DateTime @default(now())
+}
+
+// 训练记录
+model TrainingSession {
+  id             String   @id @default(cuid())
+  userId         String
+  type           String   // serve, forehand, backhand, volley, rally
+  duration       Int      // 训练时长（秒）
+  totalShots     Int      @default(0)
+  successfulShots Int     @default(0)
+  avgSpeed       Float?   // 平均球速
+  maxSpeed       Float?   // 最高球速
+  notes          String?
+  createdAt      DateTime @default(now())
+}
+
+// 训练目标
+model TrainingGoal {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // daily_practice, weekly_matches, monthly_rating
+  target      Int      // 目标值
+  current     Int      @default(0)
+  startDate   DateTime
+  endDate     DateTime
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 成就
+model Achievement {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // first_win, ten_wins, ace_master, etc.
+  title       String
+  description String?
+  icon        String?
+  unlockedAt  DateTime @default(now())
+
+  @@unique([userId, type])
+}
+
+// 对手分析报告
+model OpponentReport {
+  id            String   @id @default(cuid())
+  userId        String   // 报告所属用户
+  opponentId    String?  // 对手用户ID（如果已注册）
+  opponentName  String   // 对手名字
+  totalMatches  Int      @default(0)
+  wins          Int      @default(0)
+  losses        Int      @default(0)
+  // 技术分析 (JSON)
+  serveAnalysis String?  // 发球分析
+  returnAnalysis String? // 接发分析
+  rallyAnalysis String?  // 底线对抗分析
+  weaknesses    String?  // 弱点总结
+  strengths     String?  // 优势总结
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  @@unique([userId, opponentName])
+}
+
+// 分享海报
+model SharePoster {
+  id          String   @id @default(cuid())
+  userId      String
+  matchId     String?
+  type        String   // match_result, stats_summary, achievement, training
+  imageUrl    String   // 生成的海报图片URL
+  viewCount   Int      @default(0)
+  shareCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+}
