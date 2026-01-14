@@ -92,8 +92,22 @@ superTennis/
 │       │   └── index.ts
 │       └── prisma/
 │           └── schema.prisma
+├── docs/                       # 项目文档
+│   ├── PRD.md                 # 产品需求文档
+│   ├── ARCHITECTURE.md        # 技术架构文档
+│   ├── AI_ALGORITHM.md        # AI 算法设计文档
+│   └── API.md                 # API 接口文档
 └── README.md
 ```
+
+## 文档索引
+
+| 文档 | 说明 |
+|-----|------|
+| [PRD.md](docs/PRD.md) | 产品需求文档 - 功能定义、用户流程、里程碑规划 |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | 技术架构文档 - 系统设计、目录结构、数据流 |
+| [AI_ALGORITHM.md](docs/AI_ALGORITHM.md) | AI 算法文档 - 检测算法、轨迹追踪、落点判定 |
+| [API.md](docs/API.md) | API 接口文档 - RESTful 接口定义、数据模型 |
 
 ## AI 鹰眼工作原理
 
