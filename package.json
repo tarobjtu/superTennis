@@ -2,6 +2,7 @@
   "name": "super-tennis",
   "version": "0.1.0",
   "private": true,
+  "description": "AI-powered tennis scoring and Hawk-Eye system",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -17,11 +18,42 @@
     "dev:mobile": "yarn workspace @super-tennis/mobile start",
     "dev": "concurrently \"yarn dev:server\" \"yarn dev:mobile\"",
     "db:push": "yarn workspace @super-tennis/server db:push",
-    "db:studio": "yarn workspace @super-tennis/server db:studio"
+    "db:studio": "yarn workspace @super-tennis/server db:studio",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json}\"",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky install"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^9.0.0",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.2.0",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.3.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,json}": [
+      "prettier --write"
+    ]
   },
   "engines": {
     "node": ">=18.0.0"
