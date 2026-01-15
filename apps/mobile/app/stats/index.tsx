@@ -71,19 +71,26 @@ export default function StatsScreen() {
       let totalSetsLost = 0;
 
       finishedMatches.forEach((match: Match) => {
-        const p1Sets = JSON.parse(match.player1Sets) as number[];
-        const p2Sets = JSON.parse(match.player2Sets) as number[];
+        try {
+          const p1Sets = match.player1Sets ? JSON.parse(match.player1Sets) : [];
+          const p2Sets = match.player2Sets ? JSON.parse(match.player2Sets) : [];
 
-        p1Sets.forEach((games, i) => {
-          totalGamesWon += games;
-          totalGamesLost += p2Sets[i] || 0;
+          if (Array.isArray(p1Sets) && Array.isArray(p2Sets)) {
+            p1Sets.forEach((games, i) => {
+              totalGamesWon += games || 0;
+              totalGamesLost += p2Sets[i] || 0;
 
-          if (games > (p2Sets[i] || 0)) {
-            totalSetsWon++;
-          } else if (games < (p2Sets[i] || 0)) {
-            totalSetsLost++;
+              if ((games || 0) > (p2Sets[i] || 0)) {
+                totalSetsWon++;
+              } else if ((games || 0) < (p2Sets[i] || 0)) {
+                totalSetsLost++;
+              }
+            });
           }
-        });
+        } catch (e) {
+          // Skip matches with invalid data
+          console.warn('Invalid match data:', match.id);
+        }
       });
 
       // 计算时长
