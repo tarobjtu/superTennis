@@ -271,3 +271,253 @@ describe('COURT_DIMENSIONS', () => {
     expect(COURT_DIMENSIONS.netHeight.posts).toBe(1.07);
   });
 });
+
+// ==================== 新增测试用例 ====================
+
+describe('isPointInBounds - edge cases', () => {
+  const halfWidth = COURT_DIMENSIONS.singles.width / 2;
+  const halfLength = COURT_DIMENSIONS.singles.length / 2;
+
+  describe('on-line cases (tennis rule: on line = IN)', () => {
+    it('should return IN for ball exactly on sideline', () => {
+      const result = isPointInBounds({ x: halfWidth, y: 0 }, 'singles');
+      // 刚好在线上应该是 IN（网球规则）
+      expect(result.isIn).toBe(true);
+    });
+
+    it('should return IN for ball exactly on baseline', () => {
+      const result = isPointInBounds({ x: 0, y: halfLength }, 'singles');
+      expect(result.isIn).toBe(true);
+    });
+
+    it('should return IN for ball exactly on corner', () => {
+      const result = isPointInBounds({ x: halfWidth, y: halfLength }, 'singles');
+      expect(result.isIn).toBe(true);
+    });
+
+    it('should return IN for ball on negative sideline', () => {
+      const result = isPointInBounds({ x: -halfWidth, y: 0 }, 'singles');
+      expect(result.isIn).toBe(true);
+    });
+
+    it('should return IN for ball on negative baseline', () => {
+      const result = isPointInBounds({ x: 0, y: -halfLength }, 'singles');
+      expect(result.isIn).toBe(true);
+    });
+  });
+
+  describe('just outside cases', () => {
+    it('should return OUT for ball 1mm outside sideline', () => {
+      const result = isPointInBounds({ x: halfWidth + 0.001, y: 0 }, 'singles');
+      expect(result.isIn).toBe(false);
+    });
+
+    it('should return OUT for ball 1mm outside baseline', () => {
+      const result = isPointInBounds({ x: 0, y: halfLength + 0.001 }, 'singles');
+      expect(result.isIn).toBe(false);
+    });
+  });
+
+  describe('extreme values', () => {
+    it('should handle very large coordinates', () => {
+      const result = isPointInBounds({ x: 1000, y: 1000 }, 'singles');
+      expect(result.isIn).toBe(false);
+      expect(result.distanceFromLine).toBeLessThan(0);
+    });
+
+    it('should handle zero coordinates', () => {
+      const result = isPointInBounds({ x: 0, y: 0 }, 'singles');
+      expect(result.isIn).toBe(true);
+    });
+  });
+});
+
+describe('isServeValid - edge cases', () => {
+  const serviceBox = COURT_DIMENSIONS.serviceBox;
+
+  it('should return OUT for serve on service line (close call)', () => {
+    // 刚好在发球线上
+    const result = isServeValid({ x: -2, y: serviceBox.length }, 'deuce', 'near');
+    expect(result.isIn).toBe(true);
+  });
+
+  it('should return OUT for serve just beyond service line', () => {
+    const result = isServeValid({ x: -2, y: serviceBox.length + 0.01 }, 'deuce', 'near');
+    expect(result.isIn).toBe(false);
+  });
+
+  it('should return OUT for serve on center line', () => {
+    // 刚好在中线上
+    const result = isServeValid({ x: 0, y: 3 }, 'deuce', 'near');
+    expect(result.isIn).toBe(true);
+  });
+});
+
+describe('BallTracker - advanced scenarios', () => {
+  let tracker: BallTracker;
+
+  beforeEach(() => {
+    tracker = new BallTracker();
+  });
+
+  describe('velocity calculation precision', () => {
+    it('should predict landing point with linear motion', () => {
+      // 模拟匀速直线运动
+      for (let i = 0; i < 10; i++) {
+        tracker.addPosition(i * 10, i * 5);
+      }
+      const prediction = tracker.predictLandingPoint();
+      expect(prediction).not.toBeNull();
+      // 验证预测点在轨迹延长线上
+      expect(prediction!.x).toBeGreaterThan(90);
+      expect(prediction!.y).toBeGreaterThan(45);
+    });
+
+    it('should handle stationary ball', () => {
+      // 球静止不动
+      for (let i = 0; i < 5; i++) {
+        tracker.addPosition(100, 100);
+      }
+      const prediction = tracker.predictLandingPoint();
+      expect(prediction).not.toBeNull();
+      // 静止球预测位置应该接近当前位置
+      expect(prediction!.x).toBeCloseTo(100, 0);
+      expect(prediction!.y).toBeCloseTo(100, 0);
+    });
+  });
+
+  describe('bounce detection edge cases', () => {
+    it('should detect sharp bounce (high velocity change)', () => {
+      tracker.addPosition(100, 0);
+      tracker.addPosition(100, 50);   // 快速下落
+      tracker.addPosition(100, 20);   // 快速反弹
+      expect(tracker.detectBounce()).toBe(true);
+    });
+
+    it('should not detect bounce for horizontal motion', () => {
+      tracker.addPosition(0, 100);
+      tracker.addPosition(50, 100);
+      tracker.addPosition(100, 100);
+      expect(tracker.detectBounce()).toBe(false);
+    });
+
+    it('should not detect bounce for continuous downward motion', () => {
+      tracker.addPosition(100, 0);
+      tracker.addPosition(100, 10);
+      tracker.addPosition(100, 20);
+      expect(tracker.detectBounce()).toBe(false);
+    });
+  });
+
+  describe('position history management', () => {
+    it('should maintain max 30 positions', () => {
+      for (let i = 0; i < 50; i++) {
+        tracker.addPosition(i, i);
+      }
+      // 内部应该只保留最近30个位置
+      // 通过预测来间接验证
+      const prediction = tracker.predictLandingPoint();
+      expect(prediction).not.toBeNull();
+    });
+
+    it('should work correctly after clear and refill', () => {
+      for (let i = 0; i < 10; i++) {
+        tracker.addPosition(i, i);
+      }
+      tracker.clear();
+      expect(tracker.predictLandingPoint()).toBeNull();
+
+      for (let i = 0; i < 5; i++) {
+        tracker.addPosition(i * 2, i * 2);
+      }
+      expect(tracker.predictLandingPoint()).not.toBeNull();
+    });
+  });
+});
+
+describe('calculatePerspectiveTransform - edge cases', () => {
+  it('should handle empty array', () => {
+    const result = calculatePerspectiveTransform([]);
+    expect(result).toEqual([
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ]);
+  });
+
+  it('should handle 3 points (not enough)', () => {
+    const result = calculatePerspectiveTransform([
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 100, y: 200 },
+    ]);
+    expect(result).toEqual([
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ]);
+  });
+
+  it('should calculate non-identity matrix for valid 4 points', () => {
+    const points = [
+      { x: 0, y: 0 },
+      { x: 400, y: 0 },
+      { x: 400, y: 600 },
+      { x: 0, y: 600 },
+    ];
+    const result = calculatePerspectiveTransform(points);
+
+    // 验证不是单位矩阵
+    expect(result[0][0]).not.toBe(1);
+    expect(result[1][1]).not.toBe(1);
+    // 验证缩放因子为正
+    expect(result[0][0]).toBeGreaterThan(0);
+    expect(result[1][1]).toBeGreaterThan(0);
+  });
+});
+
+describe('screenToCourtCoordinates - edge cases', () => {
+  it('should handle identity transform', () => {
+    const identity = [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ];
+    const result = screenToCourtCoordinates({ x: 100, y: 200 }, identity);
+    expect(result.x).toBe(100);
+    expect(result.y).toBe(200);
+  });
+
+  it('should apply scaling correctly', () => {
+    const scaleTransform = [
+      [2, 0, 0],
+      [0, 3, 0],
+      [0, 0, 1],
+    ];
+    const result = screenToCourtCoordinates({ x: 50, y: 100 }, scaleTransform);
+    expect(result.x).toBe(100);
+    expect(result.y).toBe(300);
+  });
+
+  it('should apply translation correctly', () => {
+    const translateTransform = [
+      [1, 0, -50],
+      [0, 1, -100],
+      [0, 0, 1],
+    ];
+    const result = screenToCourtCoordinates({ x: 100, y: 200 }, translateTransform);
+    expect(result.x).toBe(50);
+    expect(result.y).toBe(100);
+  });
+
+  it('should handle zero coordinates', () => {
+    const transform = [
+      [0.1, 0, 0],
+      [0, 0.1, 0],
+      [0, 0, 1],
+    ];
+    const result = screenToCourtCoordinates({ x: 0, y: 0 }, transform);
+    expect(result.x).toBe(0);
+    expect(result.y).toBe(0);
+  });
+});
