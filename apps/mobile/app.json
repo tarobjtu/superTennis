@@ -43,7 +43,8 @@
           "microphonePermissionText": "用于录制比赛声音",
           "enableFrameProcessors": true
         }
-      ]
+      ],
+      "./plugins/withTennisBallDetector.js"
     ],
     "experiments": {
       "typedRoutes": true

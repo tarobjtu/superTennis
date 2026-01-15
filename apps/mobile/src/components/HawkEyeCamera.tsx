@@ -14,8 +14,9 @@ import {
   useFrameProcessor,
   Frame,
 } from 'react-native-vision-camera';
-import { useRunOnJS } from 'react-native-worklets-core';
+import { useRunOnJS, useSharedValue } from 'react-native-worklets-core';
 import { visionHawkEye, BallDetection, HawkEyeAnalysis } from '../services/visionHawkEye';
+import { detectTennisBall, isNativeDetectionAvailable, NativeDetectionResult } from '../services/nativeBallDetector';
 import { CalibrationPoint } from '../stores/matchStore';
 
 interface HawkEyeCameraProps {
@@ -37,6 +38,8 @@ interface HawkEyeCameraProps {
   resolution?: '720p' | '1080p' | '4k';
   // 自定义样式
   style?: object;
+  // 是否使用原生 ML 检测 (需要 Development Build)
+  useNativeDetection?: boolean;
 }
 
 // 模拟检测（在没有真实检测时使用）
@@ -75,12 +78,23 @@ export default function HawkEyeCamera({
   targetFps = 60,
   resolution = '1080p',
   style,
+  useNativeDetection = true,
 }: HawkEyeCameraProps) {
   const [hasPermission, setHasPermission] = useState(false);
   const [fps, setFps] = useState(0);
   const [lastAnalysis, setLastAnalysis] = useState<HawkEyeAnalysis | null>(null);
+  const [detectionMode, setDetectionMode] = useState<'native' | 'simulation'>('simulation');
   const frameCountRef = useRef(0);
   const lastFpsUpdateRef = useRef(Date.now());
+
+  // Check native detection availability on mount
+  useEffect(() => {
+    const nativeAvailable = isNativeDetectionAvailable();
+    setDetectionMode(useNativeDetection && nativeAvailable ? 'native' : 'simulation');
+    if (showDebug) {
+      console.log(`[HawkEyeCamera] Detection mode: ${nativeAvailable ? 'native' : 'simulation'}`);
+    }
+  }, [useNativeDetection, showDebug]);
 
   // 获取后置摄像头
   const device = useCameraDevice('back');
@@ -152,12 +166,25 @@ export default function HawkEyeCamera({
       const height = frame.height;
       const timestamp = Date.now();
 
-      // TODO: 在这里调用 Native 检测插件
-      // 目前使用模拟检测
-      // const detection = detectTennisBall(frame);
+      // 每 2 帧检测一次以提高性能
+      if (frameCountRef.current % 2 !== 0) return;
 
-      // 模拟检测 (每 2 帧检测一次以提高性能)
-      if (frameCountRef.current % 2 === 0) {
+      // 尝试使用原生 ML 检测
+      const nativeResult = detectTennisBall(frame, { confidence: 0.5 });
+
+      if (nativeResult) {
+        // 原生检测成功，转换为 BallDetection 格式
+        const detection: BallDetection = {
+          x: nativeResult.x,
+          y: nativeResult.y,
+          confidence: nativeResult.confidence,
+          timestamp: nativeResult.timestamp,
+          frameWidth: nativeResult.frameWidth,
+          frameHeight: nativeResult.frameHeight,
+        };
+        runHandleDetection(detection);
+      } else {
+        // 原生检测不可用或未检测到，使用模拟检测
         const detection = simulateDetection(width, height, timestamp);
         if (detection) {
           runHandleDetection(detection);
@@ -221,6 +248,9 @@ export default function HawkEyeCamera({
       {showDebug && (
         <View style={styles.debugOverlay}>
           <Text style={styles.debugText}>FPS: {fps}</Text>
+          <Text style={styles.debugText}>
+            模式: {detectionMode === 'native' ? 'ML原生' : '模拟'}
+          </Text>
           <Text style={styles.debugText}>
             检测: {isDetecting ? '开启' : '关闭'}
           </Text>

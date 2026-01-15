@@ -35,8 +35,9 @@ yarn-error.*
 # TypeScript
 *.tsbuildinfo
 
-# Generated native folders
-apps/mobile/ios
+# Generated native folders (except custom native code)
+apps/mobile/ios/*
+!apps/mobile/ios/TennisBallDetector/
 apps/mobile/android
 
 # IDE
@@ -52,3 +53,14 @@ logs/
 # Database
 *.db
 *.sqlite
+
+# ML Training
+ml/datasets/
+ml/runs/
+ml/exports/
+*.mlpackage
+*.mlmodelc
+*.pt
+
+# Test coverage
+coverage/
