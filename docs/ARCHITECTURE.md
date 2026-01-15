@@ -1,5 +1,9 @@
 # SuperTennis 技术架构文档
 
+> **文档版本**: v0.2.0
+> **最后更新**: 2026-01-15
+> **状态**: Active
+
 ## 1. 系统架构
 
 ### 1.1 整体架构
@@ -42,20 +46,35 @@ superTennis/
 │   ├── mobile/                      # React Native 移动端
 │   │   ├── app/                     # Expo Router 页面
 │   │   │   ├── _layout.tsx          # 根布局
-│   │   │   ├── index.tsx            # 首页
+│   │   │   ├── (tabs)/              # Tab 导航
+│   │   │   │   └── index.tsx        # 首页
+│   │   │   ├── demo/                # AI 演示模式 (v0.2.0)
+│   │   │   │   └── index.tsx        # 演示页面
 │   │   │   └── match/               # 比赛相关页面
+│   │   │       ├── setup.tsx        # 比赛设置
 │   │   │       ├── calibration.tsx  # 场地校准
 │   │   │       ├── playing.tsx      # 比赛记分
-│   │   │       └── replay.tsx       # 比赛回放
+│   │   │       ├── replay.tsx       # 比赛回放
+│   │   │       └── result.tsx       # 比赛结果
 │   │   ├── src/
 │   │   │   ├── services/            # 服务层
 │   │   │   │   ├── tennisAI.ts      # AI 鹰眼核心
 │   │   │   │   ├── ballDetection.ts # 网球检测
-│   │   │   │   └── frameProcessor.ts# 帧处理器
-│   │   │   └── stores/              # 状态管理
-│   │   │       └── matchStore.ts    # 比赛状态
+│   │   │   │   ├── frameProcessor.ts# 帧处理器
+│   │   │   │   ├── hawkEye.ts       # 落点判定
+│   │   │   │   └── __tests__/       # 单元测试 (v0.2.0)
+│   │   │   │       ├── hawkEye.test.ts
+│   │   │   │       └── tennisAI.test.ts
+│   │   │   ├── stores/              # 状态管理
+│   │   │   │   └── matchStore.ts    # 比赛状态
+│   │   │   └── i18n/                # 国际化 (v0.2.0)
+│   │   │       ├── index.ts         # i18n 配置
+│   │   │       └── locales/
+│   │   │           ├── zh.ts        # 中文
+│   │   │           └── en.ts        # 英文
 │   │   ├── app.json                 # Expo 配置
 │   │   ├── package.json
+│   │   ├── jest.config.js           # Jest 配置
 │   │   └── tsconfig.json
 │   │
 │   └── server/                      # Express 服务端
@@ -70,8 +89,15 @@ superTennis/
 │   ├── PRD.md                       # 产品需求文档
 │   ├── ARCHITECTURE.md              # 技术架构文档
 │   ├── AI_ALGORITHM.md              # AI 算法文档
-│   └── API.md                       # API 接口文档
+│   ├── API.md                       # API 接口文档
+│   └── CHANGELOG.md                 # 版本变更记录 (v0.2.0)
 │
+├── .github/                         # GitHub 配置 (v0.2.0)
+│   └── workflows/
+│       └── ci.yml                   # CI/CD 流水线
+│
+├── .eslintrc.js                     # ESLint 配置
+├── .prettierrc                      # Prettier 配置
 ├── .gitignore
 └── README.md
 ```
@@ -88,6 +114,9 @@ superTennis/
 | 状态管理 | Zustand | 5.x | 轻量级状态管理 |
 | 摄像头 | expo-camera | 16.x | 摄像头访问 |
 | 文件系统 | expo-file-system | 18.x | 文件操作 |
+| 媒体选择 | expo-image-picker | 16.x | 图片/视频选择 |
+| 国际化 | i18next | 24.x | 多语言支持 |
+| 测试 | Jest | 29.x | 单元测试框架 |
 | 语言 | TypeScript | 5.x | 类型安全 |
 
 ### 2.2 页面路由
@@ -95,11 +124,16 @@ superTennis/
 ```
 app/
 ├── _layout.tsx          # 根布局 (Stack Navigator)
-├── index.tsx            # 首页 "/"
+├── (tabs)/
+│   └── index.tsx        # 首页 "/"
+├── demo/
+│   └── index.tsx        # AI 演示 "/demo" (v0.2.0)
 └── match/
+    ├── setup.tsx        # 设置页 "/match/setup"
     ├── calibration.tsx  # 校准页 "/match/calibration"
     ├── playing.tsx      # 比赛页 "/match/playing"
-    └── replay.tsx       # 回放页 "/match/replay"
+    ├── replay.tsx       # 回放页 "/match/replay"
+    └── result.tsx       # 结果页 "/match/result"
 ```
 
 ### 2.3 状态管理
@@ -471,3 +505,203 @@ interface SyncStrategy {
 - 不存储原始视频
 - 仅保留检测结果和统计数据
 - 用户可随时删除比赛记录
+
+## 9. 开发基础设施 (v0.2.0 新增)
+
+### 9.1 CI/CD 流水线
+
+使用 GitHub Actions 实现自动化测试和检查：
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+on: [push, pull_request]
+
+jobs:
+  lint:
+    # ESLint 代码检查
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run lint
+
+  type-check:
+    # TypeScript 类型检查
+    runs-on: ubuntu-latest
+    steps:
+      - run: npx tsc --noEmit
+
+  test:
+    # Jest 单元测试
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm test
+
+  expo-doctor:
+    # Expo 配置检查
+    runs-on: ubuntu-latest
+    steps:
+      - run: npx expo-doctor
+
+  build-server:
+    # 服务端构建验证
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run build
+```
+
+### 9.2 国际化 (i18n)
+
+基于 i18next 实现多语言支持：
+
+```typescript
+// src/i18n/index.ts
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import { getLocales } from 'expo-localization';
+
+import zh from './locales/zh';
+import en from './locales/en';
+
+i18n.use(initReactI18next).init({
+  resources: { zh: { translation: zh }, en: { translation: en } },
+  lng: getLocales()[0]?.languageCode || 'zh',
+  fallbackLng: 'zh',
+});
+```
+
+**翻译结构**：
+
+```
+locales/
+├── zh.ts          # 中文 (默认)
+│   ├── common     # 通用词汇
+│   ├── match      # 比赛相关
+│   ├── ai         # AI 功能
+│   └── settings   # 设置页面
+└── en.ts          # 英文
+```
+
+**使用示例**：
+
+```tsx
+import { useTranslation } from 'react-i18next';
+
+function Component() {
+  const { t } = useTranslation();
+  return <Text>{t('match.startMatch')}</Text>;
+}
+```
+
+### 9.3 测试基础设施
+
+**Jest 配置**：
+
+```javascript
+// jest.config.js
+module.exports = {
+  preset: 'jest-expo',
+  testMatch: ['**/__tests__/**/*.test.ts'],
+  collectCoverageFrom: ['src/services/**/*.ts'],
+};
+```
+
+**测试示例**：
+
+```typescript
+// src/services/__tests__/hawkEye.test.ts
+describe('HawkEye', () => {
+  describe('isInBounds', () => {
+    it('应该正确判断界内位置', () => {
+      const result = hawkEye.isInBounds({ x: 5, y: 10 });
+      expect(result).toBe(true);
+    });
+
+    it('应该正确判断出界位置', () => {
+      const result = hawkEye.isInBounds({ x: 15, y: 30 });
+      expect(result).toBe(false);
+    });
+  });
+});
+```
+
+### 9.4 代码质量工具
+
+**ESLint 配置**：
+
+```javascript
+// .eslintrc.js
+module.exports = {
+  extends: [
+    'eslint:recommended',
+    '@typescript-eslint/recommended',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
+  ],
+  rules: {
+    '@typescript-eslint/no-unused-vars': 'warn',
+    'react/react-in-jsx-scope': 'off',
+  },
+};
+```
+
+**Prettier 配置**：
+
+```json
+// .prettierrc
+{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 100
+}
+```
+
+## 10. AI 演示模式 (v0.2.0 新增)
+
+### 10.1 功能概述
+
+AI 演示模式允许在 iOS Simulator 中测试鹰眼判定和自动记分功能，无需真实摄像头。
+
+### 10.2 两种测试模式
+
+| 模式 | 说明 | 数据来源 |
+|-----|------|---------|
+| 模拟模式 | 自动生成测试数据 | 随机生成球位置和轨迹 |
+| 视频模式 | 从相册导入视频 | 用户选择的网球比赛视频 |
+
+### 10.3 技术实现
+
+```typescript
+// app/demo/index.tsx
+
+// 模拟模式：自动生成落点数据
+function generateMockBounce(): BallPosition {
+  return {
+    x: Math.random() * 10.97, // 球场宽度
+    y: Math.random() * 23.77, // 球场长度
+    timestamp: Date.now(),
+  };
+}
+
+// 鹰眼挑战动画
+function triggerHawkEye(position: BallPosition) {
+  const isIn = hawkEye.isInBounds(position);
+  // 显示动画效果 + IN/OUT 判定结果
+}
+```
+
+### 10.4 页面结构
+
+```
+AI 演示页面 (demo/index.tsx)
+├── 模式切换按钮（模拟/视频）
+├── 球场可视化
+│   ├── 球场线框
+│   └── 球位置标记
+├── 比分显示
+├── 控制按钮
+│   ├── 开始/停止
+│   └── 触发鹰眼
+└── 鹰眼动画覆盖层
+```

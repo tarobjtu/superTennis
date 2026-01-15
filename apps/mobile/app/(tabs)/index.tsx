@@ -127,6 +127,25 @@ export default function HomeScreen() {
           )}
         </View>
 
+        {/* AI 演示模式 */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>AI 功能</Text>
+          </View>
+          <Link href="/demo" asChild>
+            <TouchableOpacity style={styles.demoCard}>
+              <View style={styles.demoCardLeft}>
+                <Text style={styles.demoCardIcon}>👁️</Text>
+                <View>
+                  <Text style={styles.demoCardTitle}>AI 演示模式</Text>
+                  <Text style={styles.demoCardDesc}>测试鹰眼判定和自动记分</Text>
+                </View>
+              </View>
+              <Text style={styles.demoCardArrow}>›</Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
+
         {/* 俱乐部动态 */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -306,5 +325,35 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#4B5563',
     flex: 1,
+  },
+  demoCard: {
+    backgroundColor: '#1F2937',
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  demoCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  demoCardIcon: {
+    fontSize: 32,
+  },
+  demoCardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  demoCardDesc: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    marginTop: 2,
+  },
+  demoCardArrow: {
+    fontSize: 24,
+    color: '#6B7280',
   },
 });

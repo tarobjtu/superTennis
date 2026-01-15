@@ -1,14 +1,26 @@
 # SuperTennis
 
+[![CI](https://github.com/tarobjtu/superTennis/actions/workflows/ci.yml/badge.svg)](https://github.com/tarobjtu/superTennis/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](docs/CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 AI 驱动的网球比赛记分与鹰眼判定系统。
 
 ## 功能特性
 
+### 核心功能
 - **智能记分** - 支持手动记分和 AI 自动记分
 - **鹰眼系统** - 实时追踪网球轨迹，自动判定界内/出界
 - **场地校准** - 四点透视变换，将摄像头画面映射到标准网球场坐标
 - **比赛回放** - 查看 AI 分析结果，包括球轨迹和落点判定
+- **视频录制** - 比赛过程完整录制
 - **数据持久化** - 比赛记录存储在服务端
+
+### v0.2.0 新增
+- **AI 演示模式** - 在 Simulator 中测试鹰眼和自动记分功能
+- **国际化 (i18n)** - 支持中英文切换
+- **CI/CD 流水线** - GitHub Actions 自动化测试和检查
+- **代码质量** - ESLint, Prettier, Jest 测试
 
 ## 技术栈
 
@@ -75,18 +87,30 @@ superTennis/
 ├── apps/
 │   ├── mobile/                 # React Native 移动端
 │   │   ├── app/               # 页面路由
-│   │   │   ├── index.tsx      # 首页
+│   │   │   ├── (tabs)/        # Tab 导航页面
+│   │   │   │   └── index.tsx  # 首页
+│   │   │   ├── demo/          # AI 演示模式
+│   │   │   │   └── index.tsx  # 演示页面
 │   │   │   └── match/         # 比赛相关页面
+│   │   │       ├── setup.tsx        # 比赛设置
 │   │   │       ├── calibration.tsx  # 场地校准
 │   │   │       ├── playing.tsx      # 比赛记分
-│   │   │       └── replay.tsx       # 比赛回放
+│   │   │       ├── replay.tsx       # 比赛回放
+│   │   │       └── result.tsx       # 比赛结果
 │   │   └── src/
 │   │       ├── services/      # AI 服务
 │   │       │   ├── tennisAI.ts       # 鹰眼核心
 │   │       │   ├── ballDetection.ts  # 网球检测
-│   │       │   └── frameProcessor.ts # 帧处理器
-│   │       └── stores/        # 状态管理
-│   │           └── matchStore.ts
+│   │       │   ├── frameProcessor.ts # 帧处理器
+│   │       │   ├── hawkEye.ts        # 落点判定
+│   │       │   └── __tests__/        # 单元测试
+│   │       ├── stores/        # 状态管理
+│   │       │   └── matchStore.ts
+│   │       └── i18n/          # 国际化
+│   │           ├── index.ts
+│   │           └── locales/
+│   │               ├── zh.ts  # 中文
+│   │               └── en.ts  # 英文
 │   └── server/                 # Express 服务端
 │       ├── src/
 │       │   └── index.ts
@@ -96,7 +120,14 @@ superTennis/
 │   ├── PRD.md                 # 产品需求文档
 │   ├── ARCHITECTURE.md        # 技术架构文档
 │   ├── AI_ALGORITHM.md        # AI 算法设计文档
-│   └── API.md                 # API 接口文档
+│   ├── API.md                 # API 接口文档
+│   └── CHANGELOG.md           # 版本变更记录
+├── .github/
+│   └── workflows/
+│       └── ci.yml             # CI/CD 配置
+├── .eslintrc.js               # ESLint 配置
+├── .prettierrc                # Prettier 配置
+├── jest.config.js             # Jest 配置
 └── README.md
 ```
 
@@ -108,6 +139,7 @@ superTennis/
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | 技术架构文档 - 系统设计、目录结构、数据流 |
 | [AI_ALGORITHM.md](docs/AI_ALGORITHM.md) | AI 算法文档 - 检测算法、轨迹追踪、落点判定 |
 | [API.md](docs/API.md) | API 接口文档 - RESTful 接口定义、数据模型 |
+| [CHANGELOG.md](docs/CHANGELOG.md) | 版本变更记录 - 功能迭代、Bug 修复历史 |
 
 ## AI 鹰眼工作原理
 
