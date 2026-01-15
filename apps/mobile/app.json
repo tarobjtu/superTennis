@@ -34,7 +34,16 @@
     },
     "plugins": [
       "expo-router",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "用于录制比赛视频和AI鹰眼判定",
+          "enableMicrophonePermission": true,
+          "microphonePermissionText": "用于录制比赛声音",
+          "enableFrameProcessors": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -144,6 +144,19 @@ export default function HomeScreen() {
               <Text style={styles.demoCardArrow}>›</Text>
             </TouchableOpacity>
           </Link>
+
+          <Link href="/hawkeye" asChild>
+            <TouchableOpacity style={[styles.demoCard, styles.hawkeyeCard]}>
+              <View style={styles.demoCardLeft}>
+                <Text style={styles.demoCardIcon}>🎯</Text>
+                <View>
+                  <Text style={styles.demoCardTitle}>鹰眼测试 (Beta)</Text>
+                  <Text style={styles.demoCardDesc}>VisionCamera + AI 实时检测</Text>
+                </View>
+              </View>
+              <Text style={styles.demoCardArrow}>›</Text>
+            </TouchableOpacity>
+          </Link>
         </View>
 
         {/* 俱乐部动态 */}
@@ -355,5 +368,9 @@ const styles = StyleSheet.create({
   demoCardArrow: {
     fontSize: 24,
     color: '#6B7280',
+  },
+  hawkeyeCard: {
+    marginTop: 12,
+    backgroundColor: '#064E3B',
   },
 });
