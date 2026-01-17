@@ -58,9 +58,12 @@ logs/
 ml/datasets/
 ml/runs/
 ml/exports/
-*.mlpackage
-*.mlmodelc
+ml/*.mlpackage
+ml/*.mlmodelc
+ml/*.pt
 *.pt
+
+# Note: apps/mobile/ios/TennisBallDetector/*.mlpackage is tracked (for native build)
 
 # Test coverage
 coverage/

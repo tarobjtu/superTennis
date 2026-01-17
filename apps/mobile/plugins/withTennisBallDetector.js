@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Add Swift files to the Xcode project
+ * Add Swift files and ML model to the Xcode project
  */
 function withTennisBallDetectorXcode(config) {
   return withXcodeProject(config, async (config) => {
@@ -63,12 +63,39 @@ function withTennisBallDetectorXcode(config) {
             { target: xcodeProject.getFirstTarget().uuid },
             targetGroup.uuid
           );
+        } else if (file.endsWith('.mlpackage') || file.endsWith('.mlmodelc')) {
+          // Add CoreML model as resource
+          xcodeProject.addResourceFile(
+            relativePath,
+            { target: xcodeProject.getFirstTarget().uuid },
+            targetGroup.uuid
+          );
+          console.log(`[TennisBallDetector] Added ML model: ${file}`);
         }
       }
     }
 
     return config;
   });
+}
+
+/**
+ * Recursively copy a directory
+ */
+function copyDirSync(src, dest) {
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDirSync(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
 }
 
 /**
@@ -98,12 +125,19 @@ function withTennisBallDetectorFiles(config) {
         for (const file of files) {
           const srcPath = path.join(sourceDir, file);
           const destPath = path.join(destDir, file);
+          const stat = fs.statSync(srcPath);
 
-          // Only copy if different or doesn't exist
-          if (!fs.existsSync(destPath) ||
-              fs.readFileSync(srcPath).toString() !== fs.readFileSync(destPath).toString()) {
-            fs.copyFileSync(srcPath, destPath);
-            console.log(`[TennisBallDetector] Copied ${file}`);
+          if (stat.isDirectory()) {
+            // For directories like .mlpackage, copy recursively
+            copyDirSync(srcPath, destPath);
+            console.log(`[TennisBallDetector] Copied directory ${file}`);
+          } else {
+            // Only copy if different or doesn't exist
+            if (!fs.existsSync(destPath) ||
+                fs.readFileSync(srcPath).toString() !== fs.readFileSync(destPath).toString()) {
+              fs.copyFileSync(srcPath, destPath);
+              console.log(`[TennisBallDetector] Copied ${file}`);
+            }
           }
         }
       }

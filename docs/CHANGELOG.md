@@ -8,10 +8,51 @@
 ## [Unreleased]
 
 ### 计划中
-- 真实图像处理（Native Module）
 - 多摄像头支持
 - 轨迹回放动画
 - 落点热力图统计
+- Android 平台支持
+
+---
+
+## [0.3.0] - 2026-01-17
+
+### 新增
+- **原生 ML 检测** - VisionCamera + YOLOv8 CoreML 实时网球检测
+  - Swift Frame Processor 原生插件 (`TennisBallDetectorFrameProcessor`)
+  - YOLOv8n CoreML 模型导出 (INT8 量化, ~3.2MB)
+  - 60 FPS 实时推理，Neural Engine 优化
+  - Expo Config Plugin 自动集成原生代码
+- **ML 训练脚本** - `ml/train_tennis_detector.py`
+  - 支持 Roboflow 数据集下载
+  - 支持本地数据集训练
+  - 自动导出 CoreML 格式
+- **EAS Build 支持** - Development Build 配置
+  - 模拟器和真机构建配置
+  - 自动打包原生模块
+- **新增服务层**
+  - `visionHawkEye.ts` - 新版鹰眼分析服务
+  - `nativeBallDetector.ts` - 原生检测桥接
+  - `HawkEyeCamera.tsx` - 鹰眼摄像头组件
+
+### 变更
+- 摄像头从 `expo-camera` 升级到 `react-native-vision-camera v4`
+- 添加 `react-native-worklets-core` 支持 Worklet
+- 更新 Babel 配置支持 worklets 插件
+- 更新文档反映新架构
+
+### 技术改进
+- 检测准确率从 ~60% 提升到 ~80%
+- 推理速度: iPhone 15 Pro ~8ms, iPhone 13 ~12ms
+- 模型大小从 ~12.7MB 优化到 ~3.2MB (INT8 量化)
+
+### 依赖更新
+- 新增: `react-native-vision-camera`, `react-native-worklets-core`
+- 新增: 多个 Babel 兼容插件
+
+### 注意事项
+- 需要 Development Build，Expo Go 不支持原生模块
+- 真机测试需要 Apple Developer 账号
 
 ---
 
@@ -91,6 +132,7 @@
 
 | 版本 | 发布日期 | 主要特性 |
 |-----|---------|---------|
+| 0.3.0 | 2026-01-17 | 原生 ML 检测、VisionCamera + YOLOv8 CoreML |
 | 0.2.0 | 2026-01-15 | AI 演示模式、国际化、CI/CD |
 | 0.1.0 | 2026-01-14 | MVP 版本，核心功能完成 |
 

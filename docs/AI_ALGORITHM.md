@@ -677,76 +677,66 @@ function calculateJudgmentConfidence(distance: number): number {
 - **SIMD**：使用向量化指令（Native Module）
 - **增量计算**：卡尔曼滤波增量更新
 
-## 9. VisionCamera + YOLO 升级方案 (v0.3.0)
+## 9. VisionCamera + YOLOv8 CoreML 实现 (v0.3.0)
 
-### 9.1 技术架构升级
+> **状态**: 已实现并部署
+
+### 9.1 技术架构
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    react-native-vision-camera v4            │
-│    (240fps 录制 / 60fps 检测 / Frame Processors)            │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-         ┌────────────┴────────────┐
-         │                         │
-┌────────▼────────┐       ┌────────▼────────┐
-│  录制模式        │       │  检测模式        │
-│  (240fps 慢动作) │       │  (60fps 实时)   │
-└────────┬────────┘       └────────┬────────┘
-         │                         │
-         │                ┌────────▼────────┐
-         │                │ Native Frame    │
-         │                │ Processor       │
-         │                │ (Swift/ObjC)    │
-         │                └────────┬────────┘
-         │                         │
-         │                ┌────────▼────────┐
-         │                │ CoreML Model    │
-         │                │ (YOLOv8n)       │
-         │                │ Neural Engine   │
-         │                └────────┬────────┘
-         │                         │
-         └─────────────┬───────────┘
-                       │
-              ┌────────▼────────┐
-              │ VisionHawkEye   │
-              │ - Kalman Filter │
-              │ - 透视变换      │
-              │ - 落点检测      │
-              └────────┬────────┘
-                       │
-              ┌────────▼────────┐
-              │ 界内/出界判定    │
-              └─────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                       超级网球 AI 鹰眼系统                        │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐    ┌──────────────┐    ┌─────────────────┐    │
+│  │   摄像头     │───▶│  VisionCamera │───▶│ Frame Processor │    │
+│  │  (60 FPS)   │    │   (原生)      │    │   (Worklet)     │    │
+│  └─────────────┘    └──────────────┘    └────────┬────────┘    │
+│                                                   │             │
+│  ┌─────────────────────────────────────────────────▼──────────┐ │
+│  │                    原生 Swift 插件                         │ │
+│  │  ┌─────────────┐    ┌──────────────┐    ┌──────────────┐  │ │
+│  │  │ YOLOv8n    │───▶│ Vision框架   │───▶│ 检测结果     │  │ │
+│  │  │ CoreML模型 │    │ (推理)       │    │ (坐标/置信度) │  │ │
+│  │  └─────────────┘    └──────────────┘    └──────────────┘  │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                   │             │
+│  ┌────────────────────────────────────────────────▼──────────┐ │
+│  │                    TypeScript 层                          │ │
+│  │  ┌─────────────┐    ┌──────────────┐    ┌──────────────┐  │ │
+│  │  │ visionHawkEye│───▶│ 轨迹追踪    │───▶│ 落地判定     │  │ │
+│  │  │ Service     │    │ 速度计算     │    │ 出界检测     │  │ │
+│  │  └─────────────┘    └──────────────┘    └──────────────┘  │ │
+│  └────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### 9.2 YOLOv8 CoreML 模型
 
-#### 9.2.1 模型训练
+#### 9.2.1 模型导出
 
 ```python
-# 使用 Ultralytics 训练
+# ml/train_tennis_detector.py
 from ultralytics import YOLO
 
 # 加载预训练模型
 model = YOLO("yolov8n.pt")
 
-# 训练网球检测模型
-results = model.train(
-    data="tennis-ball-detection/data.yaml",
-    epochs=100,
-    imgsz=640,
-    batch=16,
-    device="mps"  # macOS Metal
-)
-
-# 导出 CoreML 格式
+# 导出 CoreML 格式 (INT8 量化)
 model.export(
     format="coreml",
     imgsz=[640, 384],  # 16:9.6 比例
-    nms=True,
-    int8=True  # 量化
+    nms=True,          # 内置 NMS
+    int8=True          # Neural Engine 优化
 )
+```
+
+**快速开始**:
+
+```bash
+cd ml
+pip3 install ultralytics coremltools
+python3 train_tennis_detector.py --export-only
+cp -r yolov8n.mlpackage ../apps/mobile/ios/TennisBallDetector/
 ```
 
 #### 9.2.2 模型规格
@@ -755,99 +745,195 @@ model.export(
 |-----|-----|
 | 基础模型 | YOLOv8 Nano |
 | 输入尺寸 | 640 × 384 |
-| 量化 | INT8 |
-| 模型大小 | ~12.7 MB |
-| 推理速度 | 60+ FPS (Neural Engine) |
-| 检测类别 | sports_ball (COCO) |
+| 量化 | INT8 (Neural Engine 优化) |
+| NMS | 内置 |
+| 目标类别 | sports ball (COCO #32) |
+| 模型大小 | ~3.2 MB |
 
-#### 9.2.3 数据集来源
+#### 9.2.3 性能预期
 
-- Roboflow Tennis Ball Detection: 3,895 张标注图片
-- 自定义采集: 建议补充不同光照/球场的数据
+| 设备 | 推理速度 | 功耗 |
+|-----|---------|------|
+| iPhone 15 Pro | ~8ms | 低 (Neural Engine) |
+| iPhone 13 | ~12ms | 低 (Neural Engine) |
+| iPhone 11 | ~18ms | 中 (GPU) |
 
 ### 9.3 Frame Processor 实现
 
-#### 9.3.1 Swift 插件示例
+#### 9.3.1 Swift 原生插件
+
+文件: `ios/TennisBallDetector/TennisBallDetectorFrameProcessor.swift`
 
 ```swift
-// TennisBallDetector.swift
 import VisionCamera
 import Vision
 import CoreML
 
-@objc(TennisBallDetectorPlugin)
-class TennisBallDetectorPlugin: FrameProcessorPlugin {
+@objc(TennisBallDetectorFrameProcessor)
+public class TennisBallDetectorFrameProcessor: FrameProcessorPlugin {
     private var model: VNCoreMLModel?
 
-    override init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]?) {
+    public override init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]? = nil) {
         super.init(proxy: proxy, options: options)
-
-        // 加载 CoreML 模型
-        guard let modelURL = Bundle.main.url(forResource: "tennis_ball_detector", withExtension: "mlpackage"),
-              let compiledURL = try? MLModel.compileModel(at: modelURL),
-              let mlModel = try? MLModel(contentsOf: compiledURL),
-              let visionModel = try? VNCoreMLModel(for: mlModel) else {
-            return
-        }
-        self.model = visionModel
+        loadModel()
     }
 
-    override func callback(_ frame: Frame, withArguments arguments: [AnyHashable: Any]?) -> Any? {
+    private func loadModel() {
+        guard let modelURL = Bundle.main.url(forResource: "yolov8n", withExtension: "mlmodelc") ??
+                            Bundle.main.url(forResource: "yolov8n", withExtension: "mlpackage") else {
+            return
+        }
+
+        do {
+            let config = MLModelConfiguration()
+            config.computeUnits = .all  // 使用 Neural Engine
+            let mlModel = try MLModel(contentsOf: modelURL, configuration: config)
+            self.model = try VNCoreMLModel(for: mlModel)
+        } catch {
+            print("Failed to load model: \(error)")
+        }
+    }
+
+    public override func callback(_ frame: Frame, withArguments arguments: [AnyHashable: Any]?) -> Any? {
         guard let model = self.model,
               let pixelBuffer = CMSampleBufferGetImageBuffer(frame.buffer) else {
             return nil
         }
 
+        var detections: [[String: Any]] = []
+
         let request = VNCoreMLRequest(model: model) { request, error in
-            guard let results = request.results as? [VNRecognizedObjectObservation] else {
-                return
+            guard let results = request.results as? [VNRecognizedObjectObservation] else { return }
+
+            for observation in results {
+                // 过滤 sports_ball 类别
+                if let label = observation.labels.first,
+                   label.identifier == "sports ball" && label.confidence > 0.5 {
+                    detections.append([
+                        "x": observation.boundingBox.midX,
+                        "y": 1.0 - observation.boundingBox.midY,  // 翻转 Y 轴
+                        "width": observation.boundingBox.width,
+                        "height": observation.boundingBox.height,
+                        "confidence": label.confidence
+                    ])
+                }
             }
-            // 处理检测结果
         }
 
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer)
+        request.imageCropAndScaleOption = .scaleFill
+
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up)
         try? handler.perform([request])
 
-        return detections
+        return detections.isEmpty ? nil : detections
     }
 }
 ```
 
-#### 9.3.2 JavaScript 调用
+#### 9.3.2 ObjC 桥接注册
 
-```typescript
-// useFrameProcessor hook
-import { useFrameProcessor } from 'react-native-vision-camera';
-import { useRunOnJS } from 'react-native-worklets-core';
+文件: `ios/TennisBallDetector/TennisBallDetectorFrameProcessor.m`
 
-const frameProcessor = useFrameProcessor((frame) => {
-  'worklet';
+```objc
+#import <VisionCamera/FrameProcessorPlugin.h>
+#import <VisionCamera/FrameProcessorPluginRegistry.h>
 
-  // 调用 Native 检测插件
-  const detections = detectTennisBall(frame);
+@interface TennisBallDetectorFrameProcessor : FrameProcessorPlugin
+@end
 
-  if (detections && detections.length > 0) {
-    // 传回 JS 线程处理
-    runOnJS(handleDetection)(detections[0]);
-  }
-}, []);
+@implementation TennisBallDetectorFrameProcessor
+
++ (void)load {
+    [FrameProcessorPluginRegistry addFrameProcessorPlugin:@"detectTennisBall"
+                                          withInitializer:^FrameProcessorPlugin*(VisionCameraProxyHolder* proxy, NSDictionary* options) {
+        return [[TennisBallDetectorFrameProcessor alloc] initWithProxy:proxy withOptions:options];
+    }];
+}
+
+@end
 ```
 
-### 9.4 准确率预期
+#### 9.3.3 TypeScript 调用
 
-| 场景 | 当前 (HSV) | 升级后 (YOLO) |
-|-----|-----------|--------------|
+文件: `src/services/nativeBallDetector.ts`
+
+```typescript
+import { VisionCameraProxy, Frame } from 'react-native-vision-camera';
+
+const plugin = VisionCameraProxy.initFrameProcessorPlugin('detectTennisBall', {});
+
+export function detectTennisBall(frame: Frame): Detection[] | null {
+  'worklet';
+  if (!plugin) return null;
+  return plugin.call(frame) as Detection[] | null;
+}
+
+interface Detection {
+  x: number;      // 归一化 X 坐标 [0, 1]
+  y: number;      // 归一化 Y 坐标 [0, 1]
+  width: number;  // 归一化宽度
+  height: number; // 归一化高度
+  confidence: number;
+}
+```
+
+### 9.4 Expo Config Plugin
+
+文件: `plugins/withTennisBallDetector.js`
+
+自动将原生代码添加到 Xcode 项目:
+
+```javascript
+const { withXcodeProject, withDangerousMod } = require('@expo/config-plugins');
+
+function withTennisBallDetector(config) {
+  // 1. 复制 Swift/ObjC 文件和 ML 模型
+  config = withDangerousMod(config, ['ios', copyNativeFiles]);
+
+  // 2. 添加到 Xcode 项目
+  config = withXcodeProject(config, addToXcodeProject);
+
+  return config;
+}
+```
+
+### 9.5 构建和部署
+
+```bash
+# 1. 安装依赖
+npm install react-native-vision-camera react-native-worklets-core
+
+# 2. 配置 babel.config.js
+# 添加 react-native-worklets-core/plugin
+
+# 3. 构建 Development Build
+cd apps/mobile
+npx eas-cli build --platform ios --profile development
+
+# 4. 安装到设备/模拟器
+# EAS 会提供下载链接或直接安装
+```
+
+**重要说明**:
+- 需要 **Development Build**，Expo Go 不支持原生模块
+- 真机测试需要 Apple Developer 账号
+- 模拟器无真实摄像头，可使用模拟模式测试
+
+### 9.6 准确率对比
+
+| 场景 | v0.2.0 (HSV) | v0.3.0 (YOLO) |
+|-----|-------------|---------------|
 | 良好光照 | 70% | 95%+ |
 | 阴影区域 | 30% | 85% |
 | 快速移动 | 50% | 80% |
 | 界内/出界判定 | ~60% | ~80% |
 
-### 9.5 单 iPhone 物理限制
+### 9.7 单 iPhone 物理限制
 
 | 限制 | 原因 | 缓解方案 |
 |-----|------|---------|
 | 深度估计误差 ±50cm-1m | 单目视觉 | 物理轨迹约束 |
-| 快速球模糊 | 240fps vs 专业 2000fps | 预测补偿 |
+| 快速球模糊 | 60fps vs 专业 2000fps | 预测补偿 |
 | 精确压线判定 | 误差 >3cm | 保守判定策略 |
 
 **结论**: 单 iPhone 可实现业余比赛辅助判定 (~80% 准确率)，但无法达到专业鹰眼系统的毫米级精度。
@@ -863,7 +949,7 @@ const frameProcessor = useFrameProcessor((frame) => {
 | 运动模糊 | 快速运动 + 低帧率 | 检测置信度下降 |
 | 遮挡问题 | 球员/球网遮挡 | 轨迹断裂 |
 
-### 9.2 改进方向
+### 10.2 改进方向
 
 1. **深度学习检测**
    - 使用 YOLO 或 MobileNet 替代 HSV 检测

@@ -17,7 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.supertennis.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "用于录制比赛视频和AI出界判定",
+        "NSCameraUsageDescription": "用于录制比赛视频和AI鹰眼判定",
         "NSMicrophoneUsageDescription": "用于录制比赛声音"
       }
     },
@@ -26,7 +26,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#10B981"
       },
-      "package": "com.supertennis.app"
+      "package": "com.supertennis.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -48,6 +52,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0cdc611b-3281-4089-bcc8-5ea625f680d3"
+      }
+    },
+    "owner": "qitao"
   }
 }
