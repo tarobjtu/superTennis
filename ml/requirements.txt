@@ -1,4 +1,4 @@
-# 鹰眼视频测试工具依赖
+# SuperTennis ML 依赖
 # pip install -r requirements.txt
 
 # YOLOv8 模型和推理
@@ -10,5 +10,8 @@ opencv-python>=4.8.0
 # 数值计算
 numpy>=1.24.0
 
-# 可选: Roboflow 数据集下载 (用于训练自定义模型)
-# roboflow>=1.0.0
+# Roboflow 数据集下载 (用于训练自定义模型)
+roboflow>=1.0.0
+
+# CoreML 模型导出 (macOS only)
+# coremltools>=7.0.0

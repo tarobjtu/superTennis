@@ -72,14 +72,21 @@ def select_dataset():
     """选择数据集"""
     datasets = [
         {
-            "name": "Hard Court Tennis Ball (推荐)",
+            "name": "Hard Court Tennis Ball v17 (推荐，最大)",
+            "workspace": "tennistracking",
+            "project": "hard-court-tennis-ball",
+            "version": 17,
+            "images": 9836,
+        },
+        {
+            "name": "Hard Court Tennis Ball v8 (中等)",
             "workspace": "tennistracking",
             "project": "hard-court-tennis-ball",
             "version": 8,
             "images": 4156,
         },
         {
-            "name": "Tennis Ball Detection",
+            "name": "Tennis Ball Detection (小型)",
             "workspace": "tennisball-3eqxr",
             "project": "tennis-ball-detection-qaxae",
             "version": 1,

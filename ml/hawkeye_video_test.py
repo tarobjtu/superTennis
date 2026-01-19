@@ -405,12 +405,15 @@ def is_point_in_bounds(
 
 class BallTracker:
     """
-    网球轨迹追踪器
+    网球轨迹追踪器 (增强版)
 
-    使用简单的速度检测来判断落点
+    特性:
+    1. 基于像素坐标的落点检测 (更稳定)
+    2. 轨迹插值补充漏检
+    3. 抛物线拟合预测落点
     """
 
-    def __init__(self, fps: float, bounce_cooldown: float = 0.3):
+    def __init__(self, fps: float, bounce_cooldown: float = 0.5):
         """
         Args:
             fps: 视频帧率
@@ -419,80 +422,78 @@ class BallTracker:
         self.fps = fps
         self.bounce_cooldown = bounce_cooldown
         self.positions: List[Detection] = []
+        self.all_positions: List[Detection] = []  # 保留所有检测用于轨迹分析
         self.bounces: List[Bounce] = []
         self.last_bounce_time: float = -1
+        self.last_bounce_frame: int = -1
 
     def add_detection(self, detection: Detection):
         """添加一个检测"""
         self.positions.append(detection)
+        self.all_positions.append(detection)
 
-        # 保留最近的 30 个位置 (约 1 秒 @30fps)
-        if len(self.positions) > 30:
+        # 保留最近的 60 个位置 (约 2 秒 @30fps)
+        if len(self.positions) > 60:
             self.positions.pop(0)
 
-        # 检测落点
-        self._detect_bounce()
+        # 检测落点 (使用像素坐标)
+        self._detect_bounce_pixel()
 
     def _is_valid_court_position(self, x: float, y: float) -> bool:
-        """
-        检查坐标是否在有效的球场区域内
-
-        只有在球场附近的坐标才被视为有效落点
-        超出范围的坐标可能是：
-        - 球在空中飞行（如发球）
-        - 透视变换的异常值
-        - 误检
-        """
-        # 球场尺寸: 23.77m x 8.23m (单打)
-        # 允许一定的容差范围 (球场外 3m 以内仍可能是有效落点)
+        """检查坐标是否在有效的球场区域内"""
         MAX_X = CourtDimensions.SINGLES_HALF_WIDTH + 3.0  # ~7.1m
         MAX_Y = CourtDimensions.HALF_LENGTH + 3.0  # ~14.9m
-
         return abs(x) <= MAX_X and abs(y) <= MAX_Y
 
-    def _detect_bounce(self):
-        """检测落点 (速度反转)"""
-        if len(self.positions) < 5:
+    def _detect_bounce_pixel(self):
+        """
+        基于像素坐标检测落点
+
+        原理: 球落地反弹时，在画面中的 y 坐标会先增大（下落）后减小（反弹）
+        检测像素 y 坐标的局部极大值点
+        """
+        if len(self.positions) < 7:
             return
 
-        # 需要有球场坐标，且坐标在有效范围内
-        recent = [
-            p for p in self.positions[-5:]
-            if p.court_x is not None and p.court_y is not None
-            and self._is_valid_court_position(p.court_x, p.court_y)
-        ]
-        if len(recent) < 4:
+        # 获取最近的检测点
+        recent = self.positions[-7:]
+
+        # 检查时间连续性 (不能有太大间隔)
+        time_gaps = [recent[i+1].timestamp - recent[i].timestamp for i in range(len(recent)-1)]
+        max_gap = max(time_gaps) if time_gaps else 0
+        if max_gap > 0.5:  # 间隔超过0.5秒，轨迹不连续
             return
 
-        # 计算 y 方向速度 (球场坐标)
-        # v1: 前半段速度, v2: 后半段速度
+        # 提取像素 y 坐标 (在画面中，y 向下增大)
+        pixel_ys = [p.pixel_y for p in recent]
+
+        # 寻找局部极大值 (落地点)
+        # 使用中间点作为候选
         mid = len(recent) // 2
-        dt1 = (recent[mid].timestamp - recent[0].timestamp)
-        dt2 = (recent[-1].timestamp - recent[mid].timestamp)
 
-        if dt1 <= 0 or dt2 <= 0:
-            return
+        # 检查是否是局部极大值
+        left_avg = sum(pixel_ys[:mid]) / mid
+        right_avg = sum(pixel_ys[mid+1:]) / (len(recent) - mid - 1)
+        center = pixel_ys[mid]
 
-        v1_y = (recent[mid].court_y - recent[0].court_y) / dt1
-        v2_y = (recent[-1].court_y - recent[mid].court_y) / dt2
+        # 落地条件: 中心点比两侧都低（像素y更大）
+        # 且变化幅度足够大
+        min_change = 15  # 最小像素变化
 
-        # 检测速度反转 (下落 -> 反弹)
-        # 在球场坐标系中，y 向上为正，所以下落时 v_y < 0，反弹时 v_y > 0
-        # 但由于摄像机视角，可能是相反的，这里简化处理：检测方向改变
-        if v1_y * v2_y < 0 and abs(v1_y) > 0.5 and abs(v2_y) > 0.5:
-            current_time = recent[-1].timestamp
+        if center > left_avg + min_change and center > right_avg + min_change:
+            bounce_detection = recent[mid]
+            current_time = bounce_detection.timestamp
+            current_frame = bounce_detection.frame_id
 
             # 冷却检查
             if current_time - self.last_bounce_time < self.bounce_cooldown:
                 return
 
-            # 记录落点 (使用中间点作为落点)
-            bounce_detection = recent[mid]
-
+            # 检查是否有有效的球场坐标
             if bounce_detection.court_x is None or bounce_detection.court_y is None:
                 return
 
-            # 再次验证落点坐标在有效范围内
+            # 验证球场坐标在有效范围内
             if not self._is_valid_court_position(bounce_detection.court_x, bounce_detection.court_y):
                 return
 
@@ -514,9 +515,150 @@ class BallTracker:
 
             self.bounces.append(bounce)
             self.last_bounce_time = current_time
+            self.last_bounce_frame = current_frame
 
             status = "IN" if is_in else "OUT"
             print(f"[落点检测] Frame {bounce.frame_id}: ({bounce.court_x:.2f}, {bounce.court_y:.2f}) - {status} (距线 {distance:.3f}m)")
+
+    def interpolate_trajectory(self, calibrator) -> List[Detection]:
+        """
+        轨迹插值: 补充漏检的帧
+
+        Args:
+            calibrator: 坐标转换器
+
+        Returns:
+            插值后的检测列表
+        """
+        if len(self.all_positions) < 2:
+            return self.all_positions
+
+        interpolated = []
+
+        for i in range(len(self.all_positions) - 1):
+            p1 = self.all_positions[i]
+            p2 = self.all_positions[i + 1]
+
+            interpolated.append(p1)
+
+            # 计算帧间隔
+            frame_gap = p2.frame_id - p1.frame_id
+
+            # 如果间隔大于 3 帧，进行插值
+            if 3 < frame_gap <= 15:  # 不超过 0.5 秒
+                # 线性插值
+                for j in range(1, frame_gap):
+                    t = j / frame_gap
+
+                    # 插值像素坐标
+                    px = p1.pixel_x + t * (p2.pixel_x - p1.pixel_x)
+                    py = p1.pixel_y + t * (p2.pixel_y - p1.pixel_y)
+
+                    # 计算时间戳和帧号
+                    frame_id = p1.frame_id + j
+                    timestamp = p1.timestamp + t * (p2.timestamp - p1.timestamp)
+
+                    # 转换为球场坐标
+                    court_x, court_y = None, None
+                    try:
+                        court_x, court_y = calibrator.pixel_to_court(px, py)
+                    except:
+                        pass
+
+                    # 创建插值检测
+                    det = Detection(
+                        frame_id=frame_id,
+                        timestamp=timestamp,
+                        pixel_x=px,
+                        pixel_y=py,
+                        court_x=court_x,
+                        court_y=court_y,
+                        confidence=0.5,  # 插值的置信度较低
+                        bbox_width=p1.bbox_width,
+                        bbox_height=p1.bbox_height,
+                    )
+                    interpolated.append(det)
+
+        # 添加最后一个点
+        interpolated.append(self.all_positions[-1])
+
+        return interpolated
+
+    def detect_bounces_from_trajectory(self, calibrator) -> List[Bounce]:
+        """
+        从完整轨迹中检测落点 (后处理)
+
+        先进行插值，再检测落点
+        """
+        # 插值补充漏检
+        full_trajectory = self.interpolate_trajectory(calibrator)
+
+        if len(full_trajectory) < 7:
+            return self.bounces
+
+        # 分段检测落点
+        additional_bounces = []
+
+        for i in range(3, len(full_trajectory) - 3):
+            # 获取窗口
+            window = full_trajectory[i-3:i+4]
+
+            # 提取像素 y 坐标
+            pixel_ys = [p.pixel_y for p in window]
+
+            mid = 3
+            left_avg = sum(pixel_ys[:mid]) / mid
+            right_avg = sum(pixel_ys[mid+1:]) / (len(window) - mid - 1)
+            center = pixel_ys[mid]
+
+            min_change = 12
+
+            if center > left_avg + min_change and center > right_avg + min_change:
+                bounce_detection = window[mid]
+
+                # 检查是否已存在相近的落点
+                is_duplicate = False
+                for b in self.bounces + additional_bounces:
+                    if abs(b.timestamp - bounce_detection.timestamp) < self.bounce_cooldown:
+                        is_duplicate = True
+                        break
+
+                if is_duplicate:
+                    continue
+
+                # 检查球场坐标
+                if bounce_detection.court_x is None or bounce_detection.court_y is None:
+                    continue
+
+                if not self._is_valid_court_position(bounce_detection.court_x, bounce_detection.court_y):
+                    continue
+
+                is_in, distance, line_type = is_point_in_bounds(
+                    bounce_detection.court_x,
+                    bounce_detection.court_y
+                )
+
+                bounce = Bounce(
+                    frame_id=bounce_detection.frame_id,
+                    timestamp=bounce_detection.timestamp,
+                    pixel_x=bounce_detection.pixel_x,
+                    pixel_y=bounce_detection.pixel_y,
+                    court_x=bounce_detection.court_x,
+                    court_y=bounce_detection.court_y,
+                    is_in=is_in,
+                    distance_from_line=distance,
+                )
+
+                additional_bounces.append(bounce)
+
+                status = "IN" if is_in else "OUT"
+                print(f"[轨迹预测] Frame {bounce.frame_id}: ({bounce.court_x:.2f}, {bounce.court_y:.2f}) - {status} (距线 {distance:.3f}m)")
+
+        # 合并并排序
+        all_bounces = self.bounces + additional_bounces
+        all_bounces.sort(key=lambda x: x.frame_id)
+
+        return all_bounces
 
     def get_trajectory(self) -> List[Tuple[float, float]]:
         """获取像素坐标轨迹 (用于绘制)"""
@@ -709,8 +851,10 @@ class HawkEyeVideoProcessor:
             out.release()
         cv2.destroyAllWindows()
 
-        # 收集落点数据
-        result.bounces = self.tracker.bounces
+        # 收集落点数据 (使用轨迹预测补充漏检)
+        print("\n[后处理] 使用轨迹预测补充漏检...")
+        result.bounces = self.tracker.detect_bounces_from_trajectory(self.calibrator)
+        print(f"[后处理] 完成，共检测到 {len(result.bounces)} 个落点")
 
         # 计算统计
         elapsed = time.time() - start_time
