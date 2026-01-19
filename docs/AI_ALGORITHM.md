@@ -938,9 +938,157 @@ npx eas-cli build --platform ios --profile development
 
 **结论**: 单 iPhone 可实现业余比赛辅助判定 (~80% 准确率)，但无法达到专业鹰眼系统的毫米级精度。
 
-## 10. 已知限制与改进方向
+## 10. 离线视频测试与评估 (v0.3.1)
 
-### 10.1 当前限制
+> **状态**: 已实现
+
+### 10.1 测试工具概览
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     离线视频测试流程                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. 视频输入                                                     │
+│     └── hawkeye_video_test.py                                   │
+│         ├── 4 点球场校准                                         │
+│         ├── YOLOv8 检测                                         │
+│         ├── 轨迹追踪 + 落点检测                                   │
+│         └── 输出报告 (JSON + TXT)                               │
+│                                                                 │
+│  2. 人工标注                                                     │
+│     └── bounce_annotator.py                                     │
+│         ├── 视频播放控制                                         │
+│         ├── 落点标记 (IN/OUT)                                   │
+│         └── 保存 Ground Truth                                   │
+│                                                                 │
+│  3. 评估计算                                                     │
+│     └── 自动对比检测结果 vs Ground Truth                         │
+│         ├── 召回率 (Recall)                                     │
+│         ├── 精确率 (Precision)                                  │
+│         ├── F1 分数                                             │
+│         └── 判定准确率                                           │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 10.2 4 点球场校准
+
+使用透视变换将像素坐标转换为球场坐标：
+
+```
+校准点顺序:
+  1. 远端左角 (Far-Left)    2. 远端右角 (Far-Right)
+
+  ┌─────────────────────────────────┐
+  │ (1)                         (2) │ ← 远端底线
+  │                                 │
+  │             球网               │
+  │                                 │
+  │ (4)                         (3) │ ← 近端底线
+  └─────────────────────────────────┘
+
+  3. 近端右角 (Near-Right)   4. 近端左角 (Near-Left)
+```
+
+### 10.3 落点检测算法 (增强版)
+
+基于像素 y 坐标的局部极大值检测：
+
+```python
+def detect_bounce_pixel(positions):
+    """
+    原理: 球落地反弹时，像素 y 坐标先增大(下落)后减小(反弹)
+    检测像素 y 坐标的局部极大值点
+    """
+    recent = positions[-7:]
+    pixel_ys = [p.pixel_y for p in recent]
+
+    mid = len(recent) // 2
+    left_avg = sum(pixel_ys[:mid]) / mid
+    right_avg = sum(pixel_ys[mid+1:]) / (len(recent) - mid - 1)
+    center = pixel_ys[mid]
+
+    min_change = 15  # 最小像素变化阈值
+
+    # 落地条件: 中心点比两侧都低(像素y更大)
+    if center > left_avg + min_change and center > right_avg + min_change:
+        return detect_bounce(recent[mid])
+    return None
+```
+
+### 10.4 轨迹插值
+
+补充漏检的帧，提高召回率：
+
+```python
+def interpolate_trajectory(positions):
+    """线性插值补充漏检"""
+    for i in range(len(positions) - 1):
+        frame_gap = positions[i+1].frame_id - positions[i].frame_id
+
+        # 间隔 3-15 帧时进行插值
+        if 3 < frame_gap <= 15:
+            for j in range(1, frame_gap):
+                t = j / frame_gap
+                px = p1.pixel_x + t * (p2.pixel_x - p1.pixel_x)
+                py = p1.pixel_y + t * (p2.pixel_y - p1.pixel_y)
+                # 创建插值检测点...
+```
+
+### 10.5 坐标有效性验证
+
+过滤无效的球场坐标（如空中的球）：
+
+```python
+def is_valid_court_position(x: float, y: float) -> bool:
+    """检查坐标是否在有效的球场区域内"""
+    MAX_X = 4.115 + 3.0  # 单打半宽 + 3m 容差 = 7.1m
+    MAX_Y = 11.885 + 3.0  # 半场长 + 3m 容差 = 14.9m
+    return abs(x) <= MAX_X and abs(y) <= MAX_Y
+```
+
+### 10.6 性能评估指标
+
+| 指标 | 定义 | 公式 |
+|------|------|------|
+| 检测率 | 有检测结果的帧比例 | 检测帧数 / 总帧数 |
+| 召回率 | 检测到的落点比例 | TP / (TP + FN) |
+| 精确率 | 检测结果中正确的比例 | TP / (TP + FP) |
+| F1 分数 | 召回率和精确率的调和平均 | 2 × P × R / (P + R) |
+| 判定准确率 | IN/OUT 判定正确比例 | 正确判定 / 匹配落点数 |
+
+### 10.7 实际测试结果 (v8 数据集, 4156 图片)
+
+| 指标 | 值 | 说明 |
+|------|-----|------|
+| 检测率 | 18% | 每 5.5 帧检测到 1 次 |
+| 召回率 | 51.6% | 检测到一半以上的落点 |
+| 精确率 | 94.1% | 检测结果高度可靠 |
+| F1 分数 | 66.7% | 综合性能 |
+| 判定准确率 | 100% | IN/OUT 判定完全正确 |
+
+### 10.8 自定义模型训练
+
+使用 Roboflow 数据集训练专用网球检测模型：
+
+```bash
+# 交互式训练
+python3 ml/train_tennis_model.py
+
+# 数据集选项
+# 1. Hard Court Tennis Ball v17 (9836 张) - 推荐
+# 2. Hard Court Tennis Ball v8  (4156 张)
+# 3. Tennis Ball Detection      (492 张)
+```
+
+训练后检测率从 2-3% (COCO 预训练) 提升到 12-18% (专用模型)。
+
+---
+
+## 11. 已知限制与改进方向
+
+### 11.1 当前限制
 
 | 限制 | 原因 | 影响 |
 |-----|------|-----|
