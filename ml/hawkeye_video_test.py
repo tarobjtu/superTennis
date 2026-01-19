@@ -433,13 +433,34 @@ class BallTracker:
         # 检测落点
         self._detect_bounce()
 
+    def _is_valid_court_position(self, x: float, y: float) -> bool:
+        """
+        检查坐标是否在有效的球场区域内
+
+        只有在球场附近的坐标才被视为有效落点
+        超出范围的坐标可能是：
+        - 球在空中飞行（如发球）
+        - 透视变换的异常值
+        - 误检
+        """
+        # 球场尺寸: 23.77m x 8.23m (单打)
+        # 允许一定的容差范围 (球场外 3m 以内仍可能是有效落点)
+        MAX_X = CourtDimensions.SINGLES_HALF_WIDTH + 3.0  # ~7.1m
+        MAX_Y = CourtDimensions.HALF_LENGTH + 3.0  # ~14.9m
+
+        return abs(x) <= MAX_X and abs(y) <= MAX_Y
+
     def _detect_bounce(self):
         """检测落点 (速度反转)"""
         if len(self.positions) < 5:
             return
 
-        # 需要有球场坐标
-        recent = [p for p in self.positions[-5:] if p.court_y is not None]
+        # 需要有球场坐标，且坐标在有效范围内
+        recent = [
+            p for p in self.positions[-5:]
+            if p.court_x is not None and p.court_y is not None
+            and self._is_valid_court_position(p.court_x, p.court_y)
+        ]
         if len(recent) < 4:
             return
 
@@ -469,6 +490,10 @@ class BallTracker:
             bounce_detection = recent[mid]
 
             if bounce_detection.court_x is None or bounce_detection.court_y is None:
+                return
+
+            # 再次验证落点坐标在有效范围内
+            if not self._is_valid_court_position(bounce_detection.court_x, bounce_detection.court_y):
                 return
 
             is_in, distance, line_type = is_point_in_bounds(
@@ -524,8 +549,18 @@ class HawkEyeVideoProcessor:
         self.confidence = confidence
         self.iou = iou
 
-        # COCO 数据集中 sports ball 的类别 ID
-        self.target_class = 32  # sports ball
+        # 自动检测模型类别
+        # 自定义模型通常只有一个类别 (索引 0)
+        # COCO 预训练模型使用 sports ball (索引 32)
+        if len(self.model.names) == 1:
+            self.target_class = 0  # 自定义单类别模型
+            print(f"检测类别: {self.model.names[0]} (索引 0)")
+        elif 32 in self.model.names:
+            self.target_class = 32  # COCO sports ball
+            print(f"检测类别: sports ball (索引 32)")
+        else:
+            self.target_class = 0  # 默认使用第一个类别
+            print(f"检测类别: {self.model.names[0]} (索引 0)")
 
         self.calibrator = CourtCalibrator()
         self.tracker: Optional[BallTracker] = None
