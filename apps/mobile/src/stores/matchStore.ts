@@ -308,7 +308,12 @@ export const useMatchStore = create<MatchState>((set, get) => ({
     if (score.isFinished) return;
 
     // 保存历史用于撤销
-    scoreHistory.push({ ...score, player1Games: [...score.player1Games], player2Games: [...score.player2Games], tiebreakPoints: [...score.tiebreakPoints] as [number, number] });
+    scoreHistory.push({
+      ...score,
+      player1Games: [...score.player1Games],
+      player2Games: [...score.player2Games],
+      tiebreakPoints: [...score.tiebreakPoints] as [number, number],
+    });
 
     const newScore = calculateNewScore(score, player, settings);
     set({ score: newScore });

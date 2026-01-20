@@ -44,9 +44,7 @@ export function generateMatchResultText(data: MatchShareData): string {
   const winnerName = data.winner === 1 ? data.player1Name : data.player2Name;
   const loserName = data.winner === 1 ? data.player2Name : data.player1Name;
 
-  const sets = data.player1Sets
-    .map((s, i) => `${s}-${data.player2Sets[i]}`)
-    .join(' ');
+  const sets = data.player1Sets.map((s, i) => `${s}-${data.player2Sets[i]}`).join(' ');
 
   const durationMin = Math.floor(data.duration / 60);
   const dateStr = data.date.toLocaleDateString('zh-CN');
@@ -203,9 +201,7 @@ export async function shareLeaderboard(
  */
 export function generateMatchPosterSvg(data: MatchShareData): string {
   const winnerName = data.winner === 1 ? data.player1Name : data.player2Name;
-  const sets = data.player1Sets
-    .map((s, i) => `${s}-${data.player2Sets[i]}`)
-    .join('  ');
+  const sets = data.player1Sets.map((s, i) => `${s}-${data.player2Sets[i]}`).join('  ');
   const dateStr = data.date.toLocaleDateString('zh-CN');
 
   return `

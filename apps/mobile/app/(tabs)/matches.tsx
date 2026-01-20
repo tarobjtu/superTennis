@@ -1,4 +1,12 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState, useCallback } from 'react';
@@ -36,9 +44,7 @@ export default function MatchesScreen() {
   // 格式化比分显示
   const formatScore = (match: Match) => {
     if (match.player1Sets.length === 0) return '0-0';
-    return match.player1Sets
-      .map((s, i) => `${s}-${match.player2Sets[i] ?? 0}`)
-      .join('  ');
+    return match.player1Sets.map((s, i) => `${s}-${match.player2Sets[i] ?? 0}`).join('  ');
   };
 
   // 格式化日期
@@ -64,11 +70,15 @@ export default function MatchesScreen() {
       <View style={styles.matchHeader}>
         <View style={styles.playerInfo}>
           <Text style={styles.playerAvatar}>👤</Text>
-          <Text style={styles.playerName} numberOfLines={1}>{item.player1Name}</Text>
+          <Text style={styles.playerName} numberOfLines={1}>
+            {item.player1Name}
+          </Text>
         </View>
         <Text style={styles.vsText}>vs</Text>
         <View style={[styles.playerInfo, styles.playerInfoRight]}>
-          <Text style={styles.playerName} numberOfLines={1}>{item.player2Name}</Text>
+          <Text style={styles.playerName} numberOfLines={1}>
+            {item.player2Name}
+          </Text>
           <Text style={styles.playerAvatar}>👤</Text>
         </View>
       </View>
@@ -77,7 +87,9 @@ export default function MatchesScreen() {
       </View>
       <View style={styles.matchFooter}>
         {item.isFinished ? (
-          <View style={[styles.resultBadge, item.winner === 1 ? styles.winBadge : styles.loseBadge]}>
+          <View
+            style={[styles.resultBadge, item.winner === 1 ? styles.winBadge : styles.loseBadge]}
+          >
             <Text style={[styles.resultText, item.winner === 1 ? styles.winText : styles.loseText]}>
               {item.winner === 1 ? item.player1Name : item.player2Name} 胜
             </Text>
@@ -88,7 +100,9 @@ export default function MatchesScreen() {
           </View>
         )}
         <View style={styles.matchMeta}>
-          {item.duration && <Text style={styles.durationText}>{formatDuration(item.duration)}</Text>}
+          {item.duration && (
+            <Text style={styles.durationText}>{formatDuration(item.duration)}</Text>
+          )}
           <Text style={styles.dateText}>{formatDate(item.createdAt)}</Text>
         </View>
       </View>

@@ -64,13 +64,15 @@ router.patch('/read-all/:userId', async (req, res) => {
 // 创建通知（内部使用）
 router.post('/', async (req, res) => {
   try {
-    const data = z.object({
-      userId: z.string(),
-      type: z.string(),
-      title: z.string(),
-      body: z.string(),
-      data: z.string().optional(),
-    }).parse(req.body);
+    const data = z
+      .object({
+        userId: z.string(),
+        type: z.string(),
+        title: z.string(),
+        body: z.string(),
+        data: z.string().optional(),
+      })
+      .parse(req.body);
 
     const notification = await prisma.notification.create({ data });
     res.status(201).json(notification);
@@ -99,11 +101,13 @@ router.delete('/:id', async (req, res) => {
 // 注册推送 token
 router.post('/push-token', async (req, res) => {
   try {
-    const data = z.object({
-      userId: z.string(),
-      token: z.string(),
-      platform: z.string(),
-    }).parse(req.body);
+    const data = z
+      .object({
+        userId: z.string(),
+        token: z.string(),
+        platform: z.string(),
+      })
+      .parse(req.body);
 
     const pushToken = await prisma.pushToken.upsert({
       where: { token: data.token },

@@ -47,12 +47,54 @@ export default function TrainingHistoryScreen() {
 
   // 模拟数据
   const mockSessions: TrainingSession[] = [
-    { id: '1', type: 'serve', duration: 1800, totalShots: 120, successfulShots: 96, createdAt: '2024-12-10T10:00:00Z' },
-    { id: '2', type: 'forehand', duration: 2400, totalShots: 200, successfulShots: 156, createdAt: '2024-12-09T14:30:00Z' },
-    { id: '3', type: 'backhand', duration: 1500, totalShots: 90, successfulShots: 63, createdAt: '2024-12-08T09:00:00Z' },
-    { id: '4', type: 'volley', duration: 1200, totalShots: 80, successfulShots: 72, createdAt: '2024-12-07T16:00:00Z' },
-    { id: '5', type: 'rally', duration: 3600, totalShots: 300, successfulShots: 240, createdAt: '2024-12-06T11:00:00Z' },
-    { id: '6', type: 'serve', duration: 2100, totalShots: 150, successfulShots: 127, createdAt: '2024-12-05T10:00:00Z' },
+    {
+      id: '1',
+      type: 'serve',
+      duration: 1800,
+      totalShots: 120,
+      successfulShots: 96,
+      createdAt: '2024-12-10T10:00:00Z',
+    },
+    {
+      id: '2',
+      type: 'forehand',
+      duration: 2400,
+      totalShots: 200,
+      successfulShots: 156,
+      createdAt: '2024-12-09T14:30:00Z',
+    },
+    {
+      id: '3',
+      type: 'backhand',
+      duration: 1500,
+      totalShots: 90,
+      successfulShots: 63,
+      createdAt: '2024-12-08T09:00:00Z',
+    },
+    {
+      id: '4',
+      type: 'volley',
+      duration: 1200,
+      totalShots: 80,
+      successfulShots: 72,
+      createdAt: '2024-12-07T16:00:00Z',
+    },
+    {
+      id: '5',
+      type: 'rally',
+      duration: 3600,
+      totalShots: 300,
+      successfulShots: 240,
+      createdAt: '2024-12-06T11:00:00Z',
+    },
+    {
+      id: '6',
+      type: 'serve',
+      duration: 2100,
+      totalShots: 150,
+      successfulShots: 127,
+      createdAt: '2024-12-05T10:00:00Z',
+    },
   ];
 
   const weeklyStats: WeeklyStats[] = [
@@ -110,7 +152,7 @@ export default function TrainingHistoryScreen() {
   const totalShots = sessions.reduce((sum, s) => sum + s.totalShots, 0);
   const totalSuccess = sessions.reduce((sum, s) => sum + s.successfulShots, 0);
   const avgSuccessRate = totalShots > 0 ? Math.round((totalSuccess / totalShots) * 100) : 0;
-  const maxDuration = Math.max(...weeklyStats.map(s => s.duration), 1);
+  const maxDuration = Math.max(...weeklyStats.map((s) => s.duration), 1);
 
   return (
     <>
@@ -122,19 +164,25 @@ export default function TrainingHistoryScreen() {
       />
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <ScrollView
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {/* 时间段选择 */}
           <View style={styles.periodSelector}>
             {(['week', 'month', 'all'] as const).map((period) => (
               <TouchableOpacity
                 key={period}
-                style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
+                style={[
+                  styles.periodButton,
+                  selectedPeriod === period && styles.periodButtonActive,
+                ]}
                 onPress={() => setSelectedPeriod(period)}
               >
-                <Text style={[styles.periodButtonText, selectedPeriod === period && styles.periodButtonTextActive]}>
+                <Text
+                  style={[
+                    styles.periodButtonText,
+                    selectedPeriod === period && styles.periodButtonTextActive,
+                  ]}
+                >
                   {period === 'week' ? '本周' : period === 'month' ? '本月' : '全部'}
                 </Text>
               </TouchableOpacity>
@@ -156,7 +204,9 @@ export default function TrainingHistoryScreen() {
               </View>
               <View style={styles.overviewStatDivider} />
               <View style={styles.overviewStatItem}>
-                <Text style={[styles.overviewStatValue, { color: '#10B981' }]}>{avgSuccessRate}%</Text>
+                <Text style={[styles.overviewStatValue, { color: '#10B981' }]}>
+                  {avgSuccessRate}%
+                </Text>
                 <Text style={styles.overviewStatLabel}>成功率</Text>
               </View>
             </View>
@@ -177,9 +227,7 @@ export default function TrainingHistoryScreen() {
                     />
                   </View>
                   <Text style={styles.chartBarLabel}>{stat.day.slice(1)}</Text>
-                  {stat.duration > 0 && (
-                    <Text style={styles.chartBarValue}>{stat.duration}分</Text>
-                  )}
+                  {stat.duration > 0 && <Text style={styles.chartBarValue}>{stat.duration}分</Text>}
                 </View>
               ))}
             </View>
@@ -189,7 +237,7 @@ export default function TrainingHistoryScreen() {
           <View style={styles.typeStatsCard}>
             <Text style={styles.typeStatsTitle}>项目分析</Text>
             {Object.entries(TRAINING_TYPES).map(([type, info]) => {
-              const typeSessions = sessions.filter(s => s.type === type);
+              const typeSessions = sessions.filter((s) => s.type === type);
               const typeShots = typeSessions.reduce((sum, s) => sum + s.totalShots, 0);
               const typeSuccess = typeSessions.reduce((sum, s) => sum + s.successfulShots, 0);
               const typeRate = typeShots > 0 ? Math.round((typeSuccess / typeShots) * 100) : 0;
@@ -216,7 +264,11 @@ export default function TrainingHistoryScreen() {
           <View style={styles.historySection}>
             <Text style={styles.historyTitle}>训练记录</Text>
             {sessions.map((session) => {
-              const typeInfo = TRAINING_TYPES[session.type] || { name: '未知', icon: '🎾', color: '#6B7280' };
+              const typeInfo = TRAINING_TYPES[session.type] || {
+                name: '未知',
+                icon: '🎾',
+                color: '#6B7280',
+              };
               const successRate = Math.round((session.successfulShots / session.totalShots) * 100);
 
               return (
@@ -231,7 +283,9 @@ export default function TrainingHistoryScreen() {
                     </Text>
                   </View>
                   <View style={styles.historyRight}>
-                    <Text style={[styles.historyRate, { color: typeInfo.color }]}>{successRate}%</Text>
+                    <Text style={[styles.historyRate, { color: typeInfo.color }]}>
+                      {successRate}%
+                    </Text>
                     <Text style={styles.historyDate}>{formatDate(session.createdAt)}</Text>
                   </View>
                 </TouchableOpacity>

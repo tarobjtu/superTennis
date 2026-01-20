@@ -84,9 +84,7 @@ export default function AnalyticsScreen() {
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {/* 时间筛选 */}
           <View style={styles.periodTabs}>
@@ -145,15 +143,11 @@ export default function AnalyticsScreen() {
               <View style={styles.chartLegend}>
                 <View style={styles.legendItem}>
                   <View style={[styles.legendDot, { backgroundColor: '#10B981' }]} />
-                  <Text style={styles.legendText}>
-                    胜 {performance?.summary?.wins || 0} 场
-                  </Text>
+                  <Text style={styles.legendText}>胜 {performance?.summary?.wins || 0} 场</Text>
                 </View>
                 <View style={styles.legendItem}>
                   <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
-                  <Text style={styles.legendText}>
-                    负 {performance?.summary?.losses || 0} 场
-                  </Text>
+                  <Text style={styles.legendText}>负 {performance?.summary?.losses || 0} 场</Text>
                 </View>
               </View>
             </View>
@@ -207,9 +201,7 @@ export default function AnalyticsScreen() {
                 <View key={tech.type} style={styles.techRow}>
                   <Text style={styles.techName}>{getTypeName(tech.type)}</Text>
                   <View style={styles.techBar}>
-                    <View
-                      style={[styles.techFill, { width: `${tech.successRate}%` }]}
-                    />
+                    <View style={[styles.techFill, { width: `${tech.successRate}%` }]} />
                   </View>
                   <Text style={styles.techValue}>{tech.successRate}%</Text>
                 </View>
@@ -218,7 +210,9 @@ export default function AnalyticsScreen() {
                 <View style={styles.recommendations}>
                   <Text style={styles.recTitle}>训练建议</Text>
                   {technique.recommendations.map((rec: string, i: number) => (
-                    <Text key={i} style={styles.recText}>• {rec}</Text>
+                    <Text key={i} style={styles.recText}>
+                      • {rec}
+                    </Text>
                   ))}
                 </View>
               )}
@@ -229,7 +223,7 @@ export default function AnalyticsScreen() {
           <View style={styles.opponentsSection}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>对手分析</Text>
-              <TouchableOpacity onPress={() => router.push('/analytics/opponents')}>
+              <TouchableOpacity onPress={() => router.push('/analytics/opponents' as any)}>
                 <Text style={styles.seeAllText}>查看全部</Text>
               </TouchableOpacity>
             </View>
@@ -238,7 +232,9 @@ export default function AnalyticsScreen() {
                 <TouchableOpacity
                   key={opp.name}
                   style={styles.opponentCard}
-                  onPress={() => router.push(`/analytics/opponent?name=${encodeURIComponent(opp.name)}`)}
+                  onPress={() =>
+                    router.push(`/analytics/opponent?name=${encodeURIComponent(opp.name)}` as any)
+                  }
                 >
                   <View style={styles.opponentAvatar}>
                     <Text style={styles.opponentAvatarText}>👤</Text>
@@ -270,8 +266,12 @@ export default function AnalyticsScreen() {
               <Text style={styles.sectionTitle}>积分趋势</Text>
               <View style={styles.ratingTrend}>
                 {performance.ratingHistory.slice(-7).map((entry: any, i: number) => {
-                  const maxRating = Math.max(...performance.ratingHistory.slice(-7).map((e: any) => e.rating));
-                  const minRating = Math.min(...performance.ratingHistory.slice(-7).map((e: any) => e.rating));
+                  const maxRating = Math.max(
+                    ...performance.ratingHistory.slice(-7).map((e: any) => e.rating)
+                  );
+                  const minRating = Math.min(
+                    ...performance.ratingHistory.slice(-7).map((e: any) => e.rating)
+                  );
                   const range = maxRating - minRating || 1;
                   const height = 20 + ((entry.rating - minRating) / range) * 60;
 

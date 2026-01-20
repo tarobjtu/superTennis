@@ -55,7 +55,7 @@ export function detectTennisBall(
     iou: options.iou ?? 0.45,
   });
 
-  return result as NativeDetectionResult | null;
+  return result as unknown as NativeDetectionResult | null;
 }
 
 /**

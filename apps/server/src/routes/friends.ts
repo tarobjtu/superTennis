@@ -8,10 +8,12 @@ const prisma = new PrismaClient();
 // 发送好友请求
 router.post('/request', async (req, res) => {
   try {
-    const { userId, friendId } = z.object({
-      userId: z.string(),
-      friendId: z.string(),
-    }).parse(req.body);
+    const { userId, friendId } = z
+      .object({
+        userId: z.string(),
+        friendId: z.string(),
+      })
+      .parse(req.body);
 
     // 检查是否已经存在好友关系
     const existing = await prisma.friendship.findFirst({
@@ -55,9 +57,11 @@ router.post('/request', async (req, res) => {
 // 接受好友请求
 router.post('/accept', async (req, res) => {
   try {
-    const { friendshipId } = z.object({
-      friendshipId: z.string(),
-    }).parse(req.body);
+    const { friendshipId } = z
+      .object({
+        friendshipId: z.string(),
+      })
+      .parse(req.body);
 
     const friendship = await prisma.friendship.update({
       where: { id: friendshipId },
@@ -97,9 +101,7 @@ router.get('/list/:userId', async (req, res) => {
     });
 
     // 获取好友的用户信息
-    const friendIds = friendships.map((f) =>
-      f.userId === userId ? f.friendId : f.userId
-    );
+    const friendIds = friendships.map((f) => (f.userId === userId ? f.friendId : f.userId));
 
     const friends = await prisma.user.findMany({
       where: { id: { in: friendIds } },
@@ -155,10 +157,7 @@ router.get('/search', async (req, res) => {
         AND: [
           { id: { not: currentUserId as string } },
           {
-            OR: [
-              { name: { contains: query } },
-              { phone: { contains: query } },
-            ],
+            OR: [{ name: { contains: query } }, { phone: { contains: query } }],
           },
         ],
       },

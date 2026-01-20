@@ -80,7 +80,7 @@ export default function VideosScreen() {
   const renderVideo = ({ item }: { item: MatchVideo }) => (
     <TouchableOpacity
       style={styles.videoCard}
-      onPress={() => router.push(`/videos/${item.id}`)}
+      onPress={() => router.push(`/videos/${item.id}` as any)}
       onLongPress={() => handleDeleteVideo(item.id)}
     >
       <View style={styles.thumbnail}>
@@ -123,11 +123,7 @@ export default function VideosScreen() {
             contentContainerStyle={styles.listContainer}
             columnWrapperStyle={styles.columnWrapper}
             refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor="#10B981"
-              />
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10B981" />
             }
             ListEmptyComponent={
               <View style={styles.emptyContainer}>

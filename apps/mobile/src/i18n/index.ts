@@ -73,10 +73,7 @@ export function useTranslation() {
  * 格式化带参数的翻译
  * 例如: formatMessage('Hello {{name}}', { name: 'World' }) => 'Hello World'
  */
-export function formatMessage(
-  template: string,
-  params: Record<string, string | number>
-): string {
+export function formatMessage(template: string, params: Record<string, string | number>): string {
   return Object.entries(params).reduce(
     (result, [key, value]) => result.replace(new RegExp(`{{${key}}}`, 'g'), String(value)),
     template

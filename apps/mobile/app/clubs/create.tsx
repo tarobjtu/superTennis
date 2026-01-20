@@ -121,9 +121,7 @@ export default function CreateClubScreen() {
             onPress={handleCreate}
             disabled={creating}
           >
-            <Text style={styles.createButtonText}>
-              {creating ? '创建中...' : '创建俱乐部'}
-            </Text>
+            <Text style={styles.createButtonText}>{creating ? '创建中...' : '创建俱乐部'}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

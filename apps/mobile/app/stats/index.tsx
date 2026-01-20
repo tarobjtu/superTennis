@@ -72,8 +72,8 @@ export default function StatsScreen() {
 
       finishedMatches.forEach((match: Match) => {
         try {
-          const p1Sets = match.player1Sets ? JSON.parse(match.player1Sets) : [];
-          const p2Sets = match.player2Sets ? JSON.parse(match.player2Sets) : [];
+          const p1Sets = match.player1Sets || [];
+          const p2Sets = match.player2Sets || [];
 
           if (Array.isArray(p1Sets) && Array.isArray(p2Sets)) {
             p1Sets.forEach((games, i) => {
@@ -98,9 +98,10 @@ export default function StatsScreen() {
         .filter((m: Match) => m.duration && m.duration > 0)
         .map((m: Match) => m.duration!);
 
-      const avgDuration = durations.length > 0
-        ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
-        : 0;
+      const avgDuration =
+        durations.length > 0
+          ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
+          : 0;
 
       const longestMatch = durations.length > 0 ? Math.max(...durations) : 0;
       const shortestMatch = durations.length > 0 ? Math.min(...durations) : 0;
@@ -226,10 +227,7 @@ export default function StatsScreen() {
                 {stats.recentForm.map((result, index) => (
                   <View
                     key={index}
-                    style={[
-                      styles.formBadge,
-                      result === 'W' ? styles.formWin : styles.formLose,
-                    ]}
+                    style={[styles.formBadge, result === 'W' ? styles.formWin : styles.formLose]}
                   >
                     <Text style={styles.formText}>{result}</Text>
                   </View>
@@ -308,9 +306,7 @@ export default function StatsScreen() {
                     <View key={item.month} style={styles.chartBar}>
                       <Text style={styles.chartValue}>{item.count}</Text>
                       <View style={[styles.chartBarFill, { height }]} />
-                      <Text style={styles.chartLabel}>
-                        {item.month.split('-')[1]}月
-                      </Text>
+                      <Text style={styles.chartLabel}>{item.month.split('-')[1]}月</Text>
                     </View>
                   );
                 })}

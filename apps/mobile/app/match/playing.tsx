@@ -1,5 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform, Animated, Switch } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Platform,
+  Animated,
+  Switch,
+} from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
@@ -43,7 +52,10 @@ export default function PlayingScreen() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [autoScoreEnabled, setAutoScoreEnabled] = useState(false);
   const [aiStatus, setAiStatus] = useState<'idle' | 'tracking' | 'bounce_detected'>('idle');
-  const [lastBounceResult, setLastBounceResult] = useState<{ isIn: boolean; position: { x: number; y: number } } | null>(null);
+  const [lastBounceResult, setLastBounceResult] = useState<{
+    isIn: boolean;
+    position: { x: number; y: number };
+  } | null>(null);
   const [processingState, setProcessingState] = useState<ProcessingState | null>(null);
   const [detectedBall, setDetectedBall] = useState<DetectedBall | null>(null);
   const hawkEyeAnim = useRef(new Animated.Value(0)).current;
@@ -110,15 +122,11 @@ export default function PlayingScreen() {
       // 注意：这里简化处理，实际应该根据谁发球/谁打出这个球来决定
       if (!isIn && !score.isFinished) {
         // 出界了，显示提示但不自动记分（让用户确认）
-        Alert.alert(
-          '检测到出界',
-          'AI 检测到球落在界外，是否记分给对方？',
-          [
-            { text: '取消', style: 'cancel' },
-            { text: '对方得分', onPress: () => updateScore(2) },
-            { text: '我得分', onPress: () => updateScore(1) },
-          ]
-        );
+        Alert.alert('检测到出界', 'AI 检测到球落在界外，是否记分给对方？', [
+          { text: '取消', style: 'cancel' },
+          { text: '对方得分', onPress: () => updateScore(2) },
+          { text: '我得分', onPress: () => updateScore(1) },
+        ]);
       }
 
       // 3秒后恢复追踪状态
@@ -310,27 +318,23 @@ export default function PlayingScreen() {
       clearInterval(timerRef.current);
     }
 
-    Alert.alert(
-      '比赛已暂停',
-      '',
-      [
-        {
-          text: '继续比赛',
-          style: 'cancel',
-          onPress: () => {
-            // 继续计时
-          },
+    Alert.alert('比赛已暂停', '', [
+      {
+        text: '继续比赛',
+        style: 'cancel',
+        onPress: () => {
+          // 继续计时
         },
-        { text: '查看统计', onPress: () => {} },
-        {
-          text: '结束比赛',
-          style: 'destructive',
-          onPress: () => {
-            handleMatchEnd();
-          },
+      },
+      { text: '查看统计', onPress: () => {} },
+      {
+        text: '结束比赛',
+        style: 'destructive',
+        onPress: () => {
+          handleMatchEnd();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const formatTime = (seconds: number) => {
@@ -359,16 +363,11 @@ export default function PlayingScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionTitle}>需要相机权限</Text>
-          <Text style={styles.permissionText}>
-            录制比赛视频需要使用相机，请授予相机权限
-          </Text>
+          <Text style={styles.permissionText}>录制比赛视频需要使用相机，请授予相机权限</Text>
           <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
             <Text style={styles.permissionButtonText}>授予权限</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.skipButton}
-            onPress={() => setCameraReady(true)}
-          >
+          <TouchableOpacity style={styles.skipButton} onPress={() => setCameraReady(true)}>
             <Text style={styles.skipButtonText}>跳过录制，继续比赛</Text>
           </TouchableOpacity>
         </View>
@@ -394,14 +393,17 @@ export default function PlayingScreen() {
       {/* AI 控制栏 */}
       <View style={styles.aiControlBar}>
         {/* AI 状态指示器 */}
-        <View style={[
-          styles.aiIndicatorBar,
-          aiStatus === 'tracking' && styles.aiIndicatorBarTracking,
-          aiStatus === 'bounce_detected' && styles.aiIndicatorBarBounce,
-        ]}>
+        <View
+          style={[
+            styles.aiIndicatorBar,
+            aiStatus === 'tracking' && styles.aiIndicatorBarTracking,
+            aiStatus === 'bounce_detected' && styles.aiIndicatorBarBounce,
+          ]}
+        >
           <Text style={styles.aiIndicatorBarText}>
             {aiStatus === 'idle' && '🎾 AI 待机'}
-            {aiStatus === 'tracking' && `🎾 AI 追踪中${processingState ? ` (${processingState.fps} FPS)` : '...'}`}
+            {aiStatus === 'tracking' &&
+              `🎾 AI 追踪中${processingState ? ` (${processingState.fps} FPS)` : '...'}`}
             {aiStatus === 'bounce_detected' && (lastBounceResult?.isIn ? '✅ 界内' : '❌ 出界')}
           </Text>
         </View>
@@ -446,7 +448,8 @@ export default function PlayingScreen() {
               {__DEV__ && processingState && autoScoreEnabled && (
                 <View style={styles.debugInfo}>
                   <Text style={styles.debugText}>
-                    帧: {processingState.framesProcessed} | 球: {processingState.detectedBalls.length}
+                    帧: {processingState.framesProcessed} | 球:{' '}
+                    {processingState.detectedBalls.length}
                   </Text>
                 </View>
               )}
@@ -467,26 +470,26 @@ export default function PlayingScreen() {
             {settings.setFormat === 'tiebreak10'
               ? '抢十'
               : score.isTiebreak
-              ? '抢七'
-              : `第${score.currentSet + 1}盘`}
+                ? '抢七'
+                : `第${score.currentSet + 1}盘`}
           </Text>
         </View>
 
         <View style={styles.scoreRow}>
           <View style={styles.playerScore}>
             <Text style={styles.playerIcon}>👤</Text>
-            <Text style={styles.playerName} numberOfLines={1}>{player1Name}</Text>
+            <Text style={styles.playerName} numberOfLines={1}>
+              {player1Name}
+            </Text>
             <Text style={styles.gamesText}>
-              {settings.setFormat === 'tiebreak10'
-                ? ''
-                : score.player1Games[score.currentSet]}
+              {settings.setFormat === 'tiebreak10' ? '' : score.player1Games[score.currentSet]}
             </Text>
             <Text style={styles.pointsText}>
               {settings.setFormat === 'tiebreak10'
                 ? score.player1Points
                 : score.isTiebreak
-                ? score.tiebreakPoints[0]
-                : POINT_DISPLAY[Math.min(score.player1Points, 3)]}
+                  ? score.tiebreakPoints[0]
+                  : POINT_DISPLAY[Math.min(score.player1Points, 3)]}
             </Text>
           </View>
 
@@ -494,18 +497,18 @@ export default function PlayingScreen() {
 
           <View style={styles.playerScore}>
             <Text style={styles.playerIcon}>👤</Text>
-            <Text style={styles.playerName} numberOfLines={1}>{player2Name}</Text>
+            <Text style={styles.playerName} numberOfLines={1}>
+              {player2Name}
+            </Text>
             <Text style={styles.gamesText}>
-              {settings.setFormat === 'tiebreak10'
-                ? ''
-                : score.player2Games[score.currentSet]}
+              {settings.setFormat === 'tiebreak10' ? '' : score.player2Games[score.currentSet]}
             </Text>
             <Text style={styles.pointsText}>
               {settings.setFormat === 'tiebreak10'
                 ? score.player2Points
                 : score.isTiebreak
-                ? score.tiebreakPoints[1]
-                : POINT_DISPLAY[Math.min(score.player2Points, 3)]}
+                  ? score.tiebreakPoints[1]
+                  : POINT_DISPLAY[Math.min(score.player2Points, 3)]}
             </Text>
           </View>
         </View>
@@ -581,12 +584,14 @@ export default function PlayingScreen() {
             styles.hawkEyeOverlay,
             {
               opacity: hawkEyeAnim,
-              transform: [{
-                scale: hawkEyeAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.9, 1],
-                }),
-              }],
+              transform: [
+                {
+                  scale: hawkEyeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.9, 1],
+                  }),
+                },
+              ],
             },
           ]}
         >
@@ -605,16 +610,14 @@ export default function PlayingScreen() {
               </>
             ) : hawkEyeResult ? (
               <>
-                <View style={[
-                  styles.hawkEyeResultBadge,
-                  hawkEyeResult.isIn ? styles.hawkEyeIn : styles.hawkEyeOut,
-                ]}>
-                  <Text style={styles.hawkEyeResultIcon}>
-                    {hawkEyeResult.isIn ? '✓' : '✗'}
-                  </Text>
-                  <Text style={styles.hawkEyeResultText}>
-                    {hawkEyeResult.isIn ? 'IN' : 'OUT'}
-                  </Text>
+                <View
+                  style={[
+                    styles.hawkEyeResultBadge,
+                    hawkEyeResult.isIn ? styles.hawkEyeIn : styles.hawkEyeOut,
+                  ]}
+                >
+                  <Text style={styles.hawkEyeResultIcon}>{hawkEyeResult.isIn ? '✓' : '✗'}</Text>
+                  <Text style={styles.hawkEyeResultText}>{hawkEyeResult.isIn ? 'IN' : 'OUT'}</Text>
                 </View>
 
                 <View style={styles.hawkEyeDetails}>
@@ -627,10 +630,12 @@ export default function PlayingScreen() {
                   <View style={styles.hawkEyeDetailDivider} />
                   <View style={styles.hawkEyeDetailItem}>
                     <Text style={styles.hawkEyeDetailLabel}>距边线</Text>
-                    <Text style={[
-                      styles.hawkEyeDetailValue,
-                      { color: hawkEyeResult.isIn ? '#10B981' : '#EF4444' },
-                    ]}>
+                    <Text
+                      style={[
+                        styles.hawkEyeDetailValue,
+                        { color: hawkEyeResult.isIn ? '#10B981' : '#EF4444' },
+                      ]}
+                    >
                       {Math.abs(hawkEyeResult.distanceFromLine).toFixed(1)}mm
                       {hawkEyeResult.isIn ? ' 界内' : ' 出界'}
                     </Text>
@@ -652,19 +657,13 @@ export default function PlayingScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity
-                  style={styles.hawkEyeReplay}
-                  onPress={handleReplay}
-                >
+                <TouchableOpacity style={styles.hawkEyeReplay} onPress={handleReplay}>
                   <Text style={styles.hawkEyeReplayText}>📹 查看慢动作回放</Text>
                 </TouchableOpacity>
               </>
             ) : null}
 
-            <TouchableOpacity
-              style={styles.hawkEyeClose}
-              onPress={dismissHawkEye}
-            >
+            <TouchableOpacity style={styles.hawkEyeClose} onPress={dismissHawkEye}>
               <Text style={styles.hawkEyeCloseText}>✕</Text>
             </TouchableOpacity>
           </View>

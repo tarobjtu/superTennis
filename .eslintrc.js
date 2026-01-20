@@ -28,14 +28,7 @@ module.exports = {
     'prefer-const': 'error',
     'no-var': 'error',
   },
-  ignorePatterns: [
-    'node_modules/',
-    'dist/',
-    'build/',
-    '.expo/',
-    '*.config.js',
-    '*.config.ts',
-  ],
+  ignorePatterns: ['node_modules/', 'dist/', 'build/', '.expo/', '*.config.js', '*.config.ts'],
   overrides: [
     {
       files: ['*.tsx'],

@@ -102,7 +102,7 @@ export default function HighlightsScreen() {
   const renderHighlight = ({ item }: { item: Highlight }) => (
     <TouchableOpacity
       style={styles.highlightCard}
-      onPress={() => router.push(`/highlights/${item.id}`)}
+      onPress={() => router.push(`/highlights/${item.id}` as any)}
       onLongPress={() => handleDeleteHighlight(item.id)}
     >
       <View style={styles.thumbnail}>
@@ -121,9 +121,7 @@ export default function HighlightsScreen() {
         <Text style={styles.highlightTitle} numberOfLines={1}>
           {item.title || getHighlightTypeLabel(item.type)}
         </Text>
-        <Text style={styles.highlightDuration}>
-          {formatDuration(item.startTime, item.endTime)}
-        </Text>
+        <Text style={styles.highlightDuration}>{formatDuration(item.startTime, item.endTime)}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -143,11 +141,7 @@ export default function HighlightsScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContainer}
             refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor="#10B981"
-              />
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10B981" />
             }
             ListEmptyComponent={
               <View style={styles.emptyContainer}>

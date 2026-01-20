@@ -24,7 +24,10 @@ describe('TennisAI', () => {
     });
 
     it('should handle less than 4 points', () => {
-      const points = [{ x: 0, y: 0 }, { x: 100, y: 0 }];
+      const points = [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ];
       ai.setCalibration(points);
       // Should not throw
     });
@@ -454,7 +457,7 @@ describe('TennisAI - advanced scenarios', () => {
       ai.recordShot('volley', 1);
 
       const events = ai.getMatchEvents();
-      const shots = events.filter(e => e.type === 'shot');
+      const shots = events.filter((e) => e.type === 'shot');
 
       expect(shots[0].details.shotType).toBe('forehand');
       expect(shots[1].details.shotType).toBe('backhand');
@@ -466,7 +469,7 @@ describe('TennisAI - advanced scenarios', () => {
       ai.endPoint(1, 'ace');
 
       const events = ai.getMatchEvents();
-      const pointEnd = events.find(e => e.type === 'point_end');
+      const pointEnd = events.find((e) => e.type === 'point_end');
 
       expect(pointEnd).toBeDefined();
       expect(pointEnd!.details.reason).toBe('ace');

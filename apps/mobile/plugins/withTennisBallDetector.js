@@ -5,11 +5,7 @@
  * to the Xcode project during prebuild.
  */
 
-const {
-  withXcodeProject,
-  withDangerousMod,
-  IOSConfig,
-} = require('@expo/config-plugins');
+const { withXcodeProject, withDangerousMod, IOSConfig } = require('@expo/config-plugins');
 const fs = require('fs');
 const path = require('path');
 
@@ -22,18 +18,10 @@ function withTennisBallDetectorXcode(config) {
     const projectName = config.modRequest.projectName;
 
     // Source files in our plugin directory
-    const sourceDir = path.join(
-      config.modRequest.projectRoot,
-      'ios',
-      'TennisBallDetector'
-    );
+    const sourceDir = path.join(config.modRequest.projectRoot, 'ios', 'TennisBallDetector');
 
     // Target group in Xcode project
-    const targetGroup = xcodeProject.addPbxGroup(
-      [],
-      'TennisBallDetector',
-      'TennisBallDetector'
-    );
+    const targetGroup = xcodeProject.addPbxGroup([], 'TennisBallDetector', 'TennisBallDetector');
 
     // Get the main group
     const mainGroup = xcodeProject.getFirstProject().firstProject.mainGroup;
@@ -133,8 +121,10 @@ function withTennisBallDetectorFiles(config) {
             console.log(`[TennisBallDetector] Copied directory ${file}`);
           } else {
             // Only copy if different or doesn't exist
-            if (!fs.existsSync(destPath) ||
-                fs.readFileSync(srcPath).toString() !== fs.readFileSync(destPath).toString()) {
+            if (
+              !fs.existsSync(destPath) ||
+              fs.readFileSync(srcPath).toString() !== fs.readFileSync(destPath).toString()
+            ) {
               fs.copyFileSync(srcPath, destPath);
               console.log(`[TennisBallDetector] Copied ${file}`);
             }

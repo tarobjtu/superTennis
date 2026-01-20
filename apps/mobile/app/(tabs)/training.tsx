@@ -14,8 +14,20 @@ import { trainingApi, TrainingSession } from '../../src/services/api';
 import { useAuthStore } from '../../src/stores/authStore';
 
 const TRAINING_TYPES = [
-  { id: 'serve', name: '发球练习', icon: '🎾', color: '#EF4444', description: '提高发球速度和准确性' },
-  { id: 'forehand', name: '正手击球', icon: '💪', color: '#F59E0B', description: '强化正手进攻能力' },
+  {
+    id: 'serve',
+    name: '发球练习',
+    icon: '🎾',
+    color: '#EF4444',
+    description: '提高发球速度和准确性',
+  },
+  {
+    id: 'forehand',
+    name: '正手击球',
+    icon: '💪',
+    color: '#F59E0B',
+    description: '强化正手进攻能力',
+  },
   { id: 'backhand', name: '反手击球', icon: '🏃', color: '#10B981', description: '提升反手稳定性' },
   { id: 'volley', name: '网前截击', icon: '⚡', color: '#3B82F6', description: '练习网前技术' },
   { id: 'rally', name: '底线对抗', icon: '🔄', color: '#8B5CF6', description: '增强底线相持能力' },
@@ -84,9 +96,7 @@ export default function TrainingScreen() {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* 头部 */}
         <View style={styles.header}>
@@ -104,9 +114,7 @@ export default function TrainingScreen() {
           <Text style={styles.weeklyTitle}>本周训练</Text>
           <View style={styles.weeklyRow}>
             <View style={styles.weeklyStat}>
-              <Text style={styles.weeklyValue}>
-                {stats?.weekly?.sessionCount || 0}
-              </Text>
+              <Text style={styles.weeklyValue}>{stats?.weekly?.sessionCount || 0}</Text>
               <Text style={styles.weeklyLabel}>训练次数</Text>
             </View>
             <View style={styles.weeklyDivider} />
@@ -205,7 +213,8 @@ export default function TrainingScreen() {
                       <Text style={styles.sessionRate}>
                         {session.totalShots > 0
                           ? Math.round((session.successfulShots / session.totalShots) * 100)
-                          : 0}%
+                          : 0}
+                        %
                       </Text>
                       <Text style={styles.sessionLabel}>成功率</Text>
                     </View>
@@ -219,7 +228,7 @@ export default function TrainingScreen() {
         {/* 成就入口 */}
         <TouchableOpacity
           style={styles.achievementsCard}
-          onPress={() => router.push('/training/achievements')}
+          onPress={() => router.push('/training/achievements' as any)}
         >
           <Text style={styles.achievementsIcon}>🏆</Text>
           <View style={styles.achievementsInfo}>

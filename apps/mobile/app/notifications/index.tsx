@@ -186,11 +186,7 @@ export default function NotificationsScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContainer}
             refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor="#10B981"
-              />
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10B981" />
             }
             ListEmptyComponent={
               <View style={styles.emptyContainer}>

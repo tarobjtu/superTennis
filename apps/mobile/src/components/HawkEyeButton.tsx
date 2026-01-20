@@ -3,13 +3,7 @@
  */
 
 import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  View,
-  Animated,
-} from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, View, Animated } from 'react-native';
 
 interface HawkEyeButtonProps {
   onPress: () => void;
@@ -40,9 +34,7 @@ export default function HawkEyeButton({
       <View style={styles.iconContainer}>
         <Text style={styles.icon}>👁️</Text>
       </View>
-      <Text style={[styles.text, !isAvailable && styles.textDisabled]}>
-        鹰眼挑战
-      </Text>
+      <Text style={[styles.text, !isAvailable && styles.textDisabled]}>鹰眼挑战</Text>
       <View style={[styles.badge, remainingChallenges === 0 && styles.badgeEmpty]}>
         <Text style={styles.badgeText}>{remainingChallenges}</Text>
       </View>

@@ -59,7 +59,8 @@ export class FrameProcessor {
   private lastFrameTime = 0;
   private onStateChange: ((state: ProcessingState) => void) | null = null;
   private onBallDetected: ((ball: DetectedBall) => void) | null = null;
-  private onBounceDetected: ((position: { x: number; y: number }, isIn: boolean) => void) | null = null;
+  private onBounceDetected: ((position: { x: number; y: number }, isIn: boolean) => void) | null =
+    null;
 
   constructor(config: Partial<FrameProcessorConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -169,11 +170,7 @@ export class FrameProcessor {
         }
 
         // 将检测结果传给 tennisAI
-        const aiResult = tennisAI.processDetection(
-          bestBall.x,
-          bestBall.y,
-          bestBall.confidence
-        );
+        const aiResult = tennisAI.processDetection(bestBall.x, bestBall.y, bestBall.confidence);
 
         // 检测落地
         if (aiResult.bounceDetected && aiResult.bouncePosition) {
@@ -207,7 +204,6 @@ export class FrameProcessor {
           // 忽略清理错误
         }
       }
-
     } catch (error) {
       this.log(`Frame processing error: ${error}`);
 

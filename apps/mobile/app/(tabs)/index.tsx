@@ -1,4 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState, useCallback } from 'react';
@@ -37,9 +45,7 @@ export default function HomeScreen() {
   // 格式化比分显示
   const formatScore = (match: Match) => {
     if (match.player1Sets.length === 0) return '0-0';
-    return match.player1Sets
-      .map((s, i) => `${s}-${match.player2Sets[i] ?? 0}`)
-      .join(' ');
+    return match.player1Sets.map((s, i) => `${s}-${match.player2Sets[i] ?? 0}`).join(' ');
   };
 
   // 格式化日期
@@ -106,9 +112,13 @@ export default function HomeScreen() {
               {recentMatches.map((match) => (
                 <View key={match.id} style={styles.matchCard}>
                   <View style={styles.matchPlayers}>
-                    <Text style={styles.matchPlayerName} numberOfLines={1}>{match.player1Name}</Text>
+                    <Text style={styles.matchPlayerName} numberOfLines={1}>
+                      {match.player1Name}
+                    </Text>
                     <Text style={styles.matchVs}>vs</Text>
-                    <Text style={styles.matchPlayerName} numberOfLines={1}>{match.player2Name}</Text>
+                    <Text style={styles.matchPlayerName} numberOfLines={1}>
+                      {match.player2Name}
+                    </Text>
                   </View>
                   <View style={styles.matchInfo}>
                     <Text style={styles.matchScore}>{formatScore(match)}</Text>

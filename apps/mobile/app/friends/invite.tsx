@@ -37,9 +37,18 @@ const getDateOptions = () => {
 
 // 时间选项
 const timeOptions = [
-  '08:00', '09:00', '10:00', '11:00',
-  '14:00', '15:00', '16:00', '17:00',
-  '18:00', '19:00', '20:00', '21:00',
+  '08:00',
+  '09:00',
+  '10:00',
+  '11:00',
+  '14:00',
+  '15:00',
+  '16:00',
+  '17:00',
+  '18:00',
+  '19:00',
+  '20:00',
+  '21:00',
 ];
 
 export default function InviteMatchScreen() {
@@ -190,9 +199,7 @@ export default function InviteMatchScreen() {
             onPress={handleSendInvite}
             disabled={sending}
           >
-            <Text style={styles.sendButtonText}>
-              {sending ? '发送中...' : '发送邀请'}
-            </Text>
+            <Text style={styles.sendButtonText}>{sending ? '发送中...' : '发送邀请'}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -222,7 +229,8 @@ export default function InviteMatchScreen() {
                   key={index}
                   style={[
                     styles.pickerOption,
-                    option.date.toDateString() === selectedDate.toDateString() && styles.pickerOptionSelected,
+                    option.date.toDateString() === selectedDate.toDateString() &&
+                      styles.pickerOptionSelected,
                   ]}
                   onPress={() => {
                     setSelectedDate(option.date);
@@ -232,7 +240,8 @@ export default function InviteMatchScreen() {
                   <Text
                     style={[
                       styles.pickerOptionText,
-                      option.date.toDateString() === selectedDate.toDateString() && styles.pickerOptionTextSelected,
+                      option.date.toDateString() === selectedDate.toDateString() &&
+                        styles.pickerOptionTextSelected,
                     ]}
                   >
                     {option.label}

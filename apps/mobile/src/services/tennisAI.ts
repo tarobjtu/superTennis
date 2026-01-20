@@ -165,10 +165,7 @@ export class TennisAI {
         this.lastBounceTime = now;
 
         // 判断是否在界内
-        const courtPos = this.screenToCourt(
-          bounceResult.position!.x,
-          bounceResult.position!.y
-        );
+        const courtPos = this.screenToCourt(bounceResult.position!.x, bounceResult.position!.y);
         const boundResult = isPointInBounds(courtPos, 'singles');
         result.isInBounds = boundResult.isIn;
 
@@ -354,9 +351,7 @@ export class TennisAI {
    */
   analyzeHawkEye(): BallLandingResult | null {
     // 找到最近的落地位置
-    const bounceEvents = this.matchEvents
-      .filter(e => e.type === 'bounce')
-      .slice(-1);
+    const bounceEvents = this.matchEvents.filter((e) => e.type === 'bounce').slice(-1);
 
     if (bounceEvents.length === 0) {
       // 如果没有检测到落地，使用最后的球位置
@@ -404,16 +399,16 @@ export class TennisAI {
     winners: number;
     errors: number;
   } {
-    const pointEnds = this.matchEvents.filter(e => e.type === 'point_end');
+    const pointEnds = this.matchEvents.filter((e) => e.type === 'point_end');
 
     return {
-      totalShots: this.matchEvents.filter(e => e.type === 'shot').length,
-      player1Shots: this.matchEvents.filter(e => e.type === 'shot' && e.player === 1).length,
-      player2Shots: this.matchEvents.filter(e => e.type === 'shot' && e.player === 2).length,
-      aces: pointEnds.filter(e => e.details?.reason === 'ace').length,
-      doubleFaults: pointEnds.filter(e => e.details?.reason === 'double_fault').length,
-      winners: pointEnds.filter(e => e.details?.reason === 'winner').length,
-      errors: pointEnds.filter(e => e.details?.reason === 'error').length,
+      totalShots: this.matchEvents.filter((e) => e.type === 'shot').length,
+      player1Shots: this.matchEvents.filter((e) => e.type === 'shot' && e.player === 1).length,
+      player2Shots: this.matchEvents.filter((e) => e.type === 'shot' && e.player === 2).length,
+      aces: pointEnds.filter((e) => e.details?.reason === 'ace').length,
+      doubleFaults: pointEnds.filter((e) => e.details?.reason === 'double_fault').length,
+      winners: pointEnds.filter((e) => e.details?.reason === 'winner').length,
+      errors: pointEnds.filter((e) => e.details?.reason === 'error').length,
     };
   }
 

@@ -118,7 +118,11 @@ class KalmanFilter {
     return { x: this.x[0], y: this.x[1], vx: this.x[2], vy: this.x[3] };
   }
 
-  update(measuredX: number, measuredY: number, timestamp: number): { x: number; y: number; vx: number; vy: number } {
+  update(
+    measuredX: number,
+    measuredY: number,
+    timestamp: number
+  ): { x: number; y: number; vx: number; vy: number } {
     const dt = this.lastTimestamp > 0 ? (timestamp - this.lastTimestamp) / 1000 : 0.033;
     this.lastTimestamp = timestamp;
 
@@ -136,13 +140,13 @@ class KalmanFilter {
 
     // 计算速度
     if (dt > 0) {
-      this.x[2] = innovation[0] / dt * K + this.x[2] * (1 - K);
-      this.x[3] = innovation[1] / dt * K + this.x[3] * (1 - K);
+      this.x[2] = (innovation[0] / dt) * K + this.x[2] * (1 - K);
+      this.x[3] = (innovation[1] / dt) * K + this.x[3] * (1 - K);
     }
 
     // 更新协方差
     for (let i = 0; i < 4; i++) {
-      this.P[i][i] *= (1 - K);
+      this.P[i][i] *= 1 - K;
     }
 
     return { x: this.x[0], y: this.x[1], vx: this.x[2], vy: this.x[3] };
@@ -426,11 +430,16 @@ export class VisionHawkEye {
     const vy2 = currentPoint.velocity.vy;
 
     // 如果 y 速度从正变负或从负变正，可能是落地
-    if ((vy1 > this.config.bounceVelocityThreshold && vy2 < -this.config.bounceVelocityThreshold) ||
-        (vy1 < -this.config.bounceVelocityThreshold && vy2 > this.config.bounceVelocityThreshold)) {
+    if (
+      (vy1 > this.config.bounceVelocityThreshold && vy2 < -this.config.bounceVelocityThreshold) ||
+      (vy1 < -this.config.bounceVelocityThreshold && vy2 > this.config.bounceVelocityThreshold)
+    ) {
       // 检查与上一次落地的时间间隔
       const lastBounce = this.bounceEvents[this.bounceEvents.length - 1];
-      if (lastBounce && currentPoint.timestamp - lastBounce.timestamp < this.config.minBounceInterval) {
+      if (
+        lastBounce &&
+        currentPoint.timestamp - lastBounce.timestamp < this.config.minBounceInterval
+      ) {
         return;
       }
 
@@ -471,11 +480,7 @@ export class VisionHawkEye {
     const distanceMm = minDist * 1000;
 
     // 球在界内或压线 (网球规则：压线算界内)
-    const isIn =
-      x >= -halfWidth &&
-      x <= halfWidth &&
-      y >= 0 &&
-      y <= halfLength * 2;
+    const isIn = x >= -halfWidth && x <= halfWidth && y >= 0 && y <= halfLength * 2;
 
     return { isIn, distance: distanceMm };
   }

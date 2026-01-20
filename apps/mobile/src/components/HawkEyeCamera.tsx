@@ -16,7 +16,11 @@ import {
 } from 'react-native-vision-camera';
 import { useRunOnJS, useSharedValue } from 'react-native-worklets-core';
 import { visionHawkEye, BallDetection, HawkEyeAnalysis } from '../services/visionHawkEye';
-import { detectTennisBall, isNativeDetectionAvailable, NativeDetectionResult } from '../services/nativeBallDetector';
+import {
+  detectTennisBall,
+  isNativeDetectionAvailable,
+  NativeDetectionResult,
+} from '../services/nativeBallDetector';
 import { CalibrationPoint } from '../stores/matchStore';
 
 interface HawkEyeCameraProps {
@@ -106,8 +110,8 @@ export default function HawkEyeCamera({
         resolution === '4k'
           ? { width: 3840, height: 2160 }
           : resolution === '1080p'
-          ? { width: 1920, height: 1080 }
-          : { width: 1280, height: 720 },
+            ? { width: 1920, height: 1080 }
+            : { width: 1280, height: 720 },
     },
     { fps: targetFps },
   ]);
@@ -251,23 +255,15 @@ export default function HawkEyeCamera({
           <Text style={styles.debugText}>
             模式: {detectionMode === 'native' ? 'ML原生' : '模拟'}
           </Text>
-          <Text style={styles.debugText}>
-            检测: {isDetecting ? '开启' : '关闭'}
-          </Text>
+          <Text style={styles.debugText}>检测: {isDetecting ? '开启' : '关闭'}</Text>
           <Text style={styles.debugText}>
             校准: {visionHawkEye.isCalibrated() ? '已完成' : '未完成'}
           </Text>
           {lastAnalysis && (
             <>
-              <Text style={styles.debugText}>
-                球速: {lastAnalysis.ballSpeed.toFixed(1)} km/h
-              </Text>
-              <Text style={styles.debugText}>
-                轨迹点: {lastAnalysis.trajectory.length}
-              </Text>
-              <Text style={styles.debugText}>
-                落地次数: {lastAnalysis.bounceEvents.length}
-              </Text>
+              <Text style={styles.debugText}>球速: {lastAnalysis.ballSpeed.toFixed(1)} km/h</Text>
+              <Text style={styles.debugText}>轨迹点: {lastAnalysis.trajectory.length}</Text>
+              <Text style={styles.debugText}>落地次数: {lastAnalysis.bounceEvents.length}</Text>
             </>
           )}
         </View>

@@ -27,10 +27,7 @@
         "backgroundColor": "#10B981"
       },
       "package": "com.supertennis.app",
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"]
     },
     "web": {
       "favicon": "./assets/favicon.png",

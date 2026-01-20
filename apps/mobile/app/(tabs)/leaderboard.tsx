@@ -19,7 +19,11 @@ export default function LeaderboardScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [period, setPeriod] = useState<'all' | 'week' | 'month'>('all');
-  const [userRank, setUserRank] = useState<{ rank: number; total: number; percentile: number } | null>(null);
+  const [userRank, setUserRank] = useState<{
+    rank: number;
+    total: number;
+    percentile: number;
+  } | null>(null);
 
   const loadLeaderboard = async () => {
     try {
@@ -80,7 +84,7 @@ export default function LeaderboardScreen() {
     return (
       <TouchableOpacity
         style={[styles.playerCard, isMe && styles.playerCardMe]}
-        onPress={() => router.push(`/profile/${item.id}`)}
+        onPress={() => router.push(`/profile/${item.id}` as any)}
       >
         <View style={[styles.rankContainer, getRankStyle(item.rank)]}>
           {rankIcon ? (
@@ -91,9 +95,7 @@ export default function LeaderboardScreen() {
         </View>
 
         <View style={styles.avatarContainer}>
-          <Text style={styles.avatar}>
-            {item.avatar || '👤'}
-          </Text>
+          <Text style={styles.avatar}>{item.avatar || '👤'}</Text>
         </View>
 
         <View style={styles.playerInfo}>
@@ -176,9 +178,7 @@ export default function LeaderboardScreen() {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>🏆</Text>

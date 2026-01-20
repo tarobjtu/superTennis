@@ -143,10 +143,10 @@ describe('calculatePerspectiveTransform', () => {
 
   it('should calculate transform for 4 calibration points', () => {
     const points = [
-      { x: 0, y: 0 },     // top-left
-      { x: 100, y: 0 },   // top-right
+      { x: 0, y: 0 }, // top-left
+      { x: 100, y: 0 }, // top-right
       { x: 100, y: 200 }, // bottom-right
-      { x: 0, y: 200 },   // bottom-left
+      { x: 0, y: 200 }, // bottom-left
     ];
     const result = calculatePerspectiveTransform(points);
 
@@ -228,7 +228,7 @@ describe('BallTracker', () => {
       // 模拟球下落然后反弹
       tracker.addPosition(0, 0);
       tracker.addPosition(0, 10); // 向下
-      tracker.addPosition(0, 5);  // 向上反弹
+      tracker.addPosition(0, 5); // 向上反弹
       expect(tracker.detectBounce()).toBe(true);
     });
 
@@ -262,7 +262,7 @@ describe('COURT_DIMENSIONS', () => {
   });
 
   it('should have correct service box dimensions', () => {
-    expect(COURT_DIMENSIONS.serviceBox.length).toBe(6.40);
+    expect(COURT_DIMENSIONS.serviceBox.length).toBe(6.4);
     expect(COURT_DIMENSIONS.serviceBox.width).toBe(4.115);
   });
 
@@ -389,8 +389,8 @@ describe('BallTracker - advanced scenarios', () => {
   describe('bounce detection edge cases', () => {
     it('should detect sharp bounce (high velocity change)', () => {
       tracker.addPosition(100, 0);
-      tracker.addPosition(100, 50);   // 快速下落
-      tracker.addPosition(100, 20);   // 快速反弹
+      tracker.addPosition(100, 50); // 快速下落
+      tracker.addPosition(100, 20); // 快速反弹
       expect(tracker.detectBounce()).toBe(true);
     });
 

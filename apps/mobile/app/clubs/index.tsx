@@ -62,29 +62,17 @@ export default function ClubsScreen() {
     const isMember = myClubs.some((c) => c.id === item.id);
 
     return (
-      <TouchableOpacity
-        style={styles.clubCard}
-        onPress={() => router.push(`/clubs/${item.id}`)}
-      >
+      <TouchableOpacity style={styles.clubCard} onPress={() => router.push(`/clubs/${item.id}`)}>
         <View style={styles.clubAvatar}>
-          <Text style={styles.clubAvatarText}>
-            {item.avatar || '🎾'}
-          </Text>
+          <Text style={styles.clubAvatarText}>{item.avatar || '🎾'}</Text>
         </View>
         <View style={styles.clubInfo}>
           <Text style={styles.clubName}>{item.name}</Text>
-          {item.location && (
-            <Text style={styles.clubLocation}>📍 {item.location}</Text>
-          )}
-          <Text style={styles.clubMembers}>
-            {item.memberCount} 位成员
-          </Text>
+          {item.location && <Text style={styles.clubLocation}>📍 {item.location}</Text>}
+          <Text style={styles.clubMembers}>{item.memberCount} 位成员</Text>
         </View>
         {!isMember && (
-          <TouchableOpacity
-            style={styles.joinButton}
-            onPress={() => handleJoin(item.id)}
-          >
+          <TouchableOpacity style={styles.joinButton} onPress={() => handleJoin(item.id)}>
             <Text style={styles.joinButtonText}>加入</Text>
           </TouchableOpacity>
         )}
@@ -98,14 +86,9 @@ export default function ClubsScreen() {
   };
 
   const renderMyClubCard = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={styles.clubCard}
-      onPress={() => router.push(`/clubs/${item.id}`)}
-    >
+    <TouchableOpacity style={styles.clubCard} onPress={() => router.push(`/clubs/${item.id}`)}>
       <View style={styles.clubAvatar}>
-        <Text style={styles.clubAvatarText}>
-          {item.avatar || '🎾'}
-        </Text>
+        <Text style={styles.clubAvatarText}>{item.avatar || '🎾'}</Text>
       </View>
       <View style={styles.clubInfo}>
         <View style={styles.clubNameRow}>
@@ -116,12 +99,8 @@ export default function ClubsScreen() {
             </View>
           )}
         </View>
-        {item.location && (
-          <Text style={styles.clubLocation}>📍 {item.location}</Text>
-        )}
-        <Text style={styles.clubMembers}>
-          {item.memberCount} 位成员
-        </Text>
+        {item.location && <Text style={styles.clubLocation}>📍 {item.location}</Text>}
+        <Text style={styles.clubMembers}>{item.memberCount} 位成员</Text>
       </View>
       <Text style={styles.arrowIcon}>›</Text>
     </TouchableOpacity>
@@ -192,9 +171,7 @@ export default function ClubsScreen() {
           renderItem={tab === 'discover' ? renderClubCard : renderMyClubCard}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyIcon}>🏠</Text>
@@ -202,10 +179,7 @@ export default function ClubsScreen() {
                 {tab === 'discover' ? '暂无俱乐部' : '你还没有加入任何俱乐部'}
               </Text>
               {tab === 'my' && (
-                <TouchableOpacity
-                  style={styles.emptyButton}
-                  onPress={() => setTab('discover')}
-                >
+                <TouchableOpacity style={styles.emptyButton} onPress={() => setTab('discover')}>
                   <Text style={styles.emptyButtonText}>发现俱乐部</Text>
                 </TouchableOpacity>
               )}

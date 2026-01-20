@@ -1,11 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { trainingApi } from '../../src/services/api';
@@ -87,29 +81,25 @@ export default function TrainingSessionScreen() {
 
     pauseSession();
 
-    Alert.alert(
-      '结束训练',
-      '确定要结束本次训练吗？',
-      [
-        { text: '取消', onPress: resumeSession },
-        {
-          text: '结束',
-          onPress: async () => {
-            try {
-              await trainingApi.updateSession(sessionId, {
-                duration,
-                totalShots,
-                successfulShots,
-              });
-              router.back();
-            } catch (error) {
-              console.error('Failed to end session:', error);
-              router.back();
-            }
-          },
+    Alert.alert('结束训练', '确定要结束本次训练吗？', [
+      { text: '取消', onPress: resumeSession },
+      {
+        text: '结束',
+        onPress: async () => {
+          try {
+            await trainingApi.updateSession(sessionId, {
+              duration,
+              totalShots,
+              successfulShots,
+            });
+            router.back();
+          } catch (error) {
+            console.error('Failed to end session:', error);
+            router.back();
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const formatTime = (seconds: number) => {
@@ -187,15 +177,11 @@ export default function TrainingSessionScreen() {
           style={styles.pauseButton}
           onPress={isRunning ? pauseSession : resumeSession}
         >
-          <Text style={styles.pauseButtonText}>
-            {isRunning ? '⏸ 暂停' : '▶ 继续'}
-          </Text>
+          <Text style={styles.pauseButtonText}>{isRunning ? '⏸ 暂停' : '▶ 继续'}</Text>
         </TouchableOpacity>
 
         {/* 提示 */}
-        <Text style={styles.hint}>
-          点击"成功"或"失误"记录每次击球结果
-        </Text>
+        <Text style={styles.hint}>点击&quot;成功&quot;或&quot;失误&quot;记录每次击球结果</Text>
       </SafeAreaView>
     </>
   );

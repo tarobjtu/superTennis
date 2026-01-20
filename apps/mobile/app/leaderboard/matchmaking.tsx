@@ -1,12 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, Stack } from 'expo-router';
 import { leaderboardApi } from '../../src/services/api';
@@ -55,37 +48,40 @@ export default function MatchmakingScreen() {
 
     // 搜索计时
     timerRef.current = setInterval(() => {
-      setSearchTime(t => t + 1);
+      setSearchTime((t) => t + 1);
     }, 1000);
 
     // 模拟匹配过程
     try {
       // const result = await leaderboardApi.findMatch(user?.id);
-      setTimeout(() => {
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
-        rotateAnim.stopAnimation();
+      setTimeout(
+        () => {
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+          }
+          rotateAnim.stopAnimation();
 
-        // 模拟匹配结果
-        setMatchedPlayer({
-          id: 'mock-player',
-          name: '李明',
-          rating: 1520,
-          winRate: 62,
-          matchesPlayed: 45,
-          distance: '3.2km',
-        });
-        setStatus('found');
+          // 模拟匹配结果
+          setMatchedPlayer({
+            id: 'mock-player',
+            name: '李明',
+            rating: 1520,
+            winRate: 62,
+            matchesPlayed: 45,
+            distance: '3.2km',
+          });
+          setStatus('found');
 
-        // 显示动画
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 5,
-          tension: 40,
-          useNativeDriver: true,
-        }).start();
-      }, 3000 + Math.random() * 2000);
+          // 显示动画
+          Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 5,
+            tension: 40,
+            useNativeDriver: true,
+          }).start();
+        },
+        3000 + Math.random() * 2000
+      );
     } catch (error) {
       console.error('Matchmaking failed:', error);
       setStatus('idle');
@@ -103,23 +99,19 @@ export default function MatchmakingScreen() {
 
   const confirmMatch = () => {
     setStatus('confirmed');
-    Alert.alert(
-      '匹配成功！',
-      `你已和 ${matchedPlayer?.name} 配对成功，对方会收到你的比赛邀请`,
-      [
-        {
-          text: '创建比赛',
-          onPress: () => {
-            router.replace('/match/setup');
-          },
+    Alert.alert('匹配成功！', `你已和 ${matchedPlayer?.name} 配对成功，对方会收到你的比赛邀请`, [
+      {
+        text: '创建比赛',
+        onPress: () => {
+          router.replace('/match/setup');
         },
-        {
-          text: '返回',
-          style: 'cancel',
-          onPress: () => router.back(),
-        },
-      ]
-    );
+      },
+      {
+        text: '返回',
+        style: 'cancel',
+        onPress: () => router.back(),
+      },
+    ]);
   };
 
   const declineMatch = () => {
@@ -182,9 +174,7 @@ export default function MatchmakingScreen() {
                 <Text style={styles.matchIcon}>🎾</Text>
               </View>
               <Text style={styles.matchTitle}>寻找水平相近的对手</Text>
-              <Text style={styles.matchSubtitle}>
-                系统将根据你的积分匹配合适的球友
-              </Text>
+              <Text style={styles.matchSubtitle}>系统将根据你的积分匹配合适的球友</Text>
 
               <View style={styles.matchRangeInfo}>
                 <Text style={styles.matchRangeLabel}>匹配范围</Text>
@@ -197,12 +187,7 @@ export default function MatchmakingScreen() {
 
           {status === 'searching' && (
             <View style={styles.searchingState}>
-              <Animated.View
-                style={[
-                  styles.searchCircle,
-                  { transform: [{ rotate: spin }] },
-                ]}
-              >
+              <Animated.View style={[styles.searchCircle, { transform: [{ rotate: spin }] }]}>
                 <View style={styles.searchInner}>
                   <Text style={styles.searchIcon}>🔍</Text>
                 </View>
@@ -217,12 +202,7 @@ export default function MatchmakingScreen() {
           )}
 
           {status === 'found' && matchedPlayer && (
-            <Animated.View
-              style={[
-                styles.foundState,
-                { transform: [{ scale: scaleAnim }] },
-              ]}
-            >
+            <Animated.View style={[styles.foundState, { transform: [{ scale: scaleAnim }] }]}>
               <Text style={styles.foundTitle}>🎉 找到对手！</Text>
 
               <View style={styles.matchedCard}>
@@ -262,16 +242,10 @@ export default function MatchmakingScreen() {
               </View>
 
               <View style={styles.foundActions}>
-                <TouchableOpacity
-                  style={styles.declineButton}
-                  onPress={declineMatch}
-                >
+                <TouchableOpacity style={styles.declineButton} onPress={declineMatch}>
                   <Text style={styles.declineButtonText}>换一个</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.confirmButton}
-                  onPress={confirmMatch}
-                >
+                <TouchableOpacity style={styles.confirmButton} onPress={confirmMatch}>
                   <Text style={styles.confirmButtonText}>开始约球</Text>
                 </TouchableOpacity>
               </View>
@@ -282,19 +256,13 @@ export default function MatchmakingScreen() {
         {/* 底部按钮 */}
         <View style={styles.bottomBar}>
           {status === 'idle' && (
-            <TouchableOpacity
-              style={styles.startButton}
-              onPress={startMatching}
-            >
+            <TouchableOpacity style={styles.startButton} onPress={startMatching}>
               <Text style={styles.startButtonText}>开始匹配</Text>
             </TouchableOpacity>
           )}
 
           {status === 'searching' && (
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={cancelMatching}
-            >
+            <TouchableOpacity style={styles.cancelButton} onPress={cancelMatching}>
               <Text style={styles.cancelButtonText}>取消匹配</Text>
             </TouchableOpacity>
           )}

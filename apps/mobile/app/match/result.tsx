@@ -22,7 +22,10 @@ export default function ResultScreen() {
   };
 
   // 计算总局数
-  const totalGames = score.player1Games.reduce((sum, g, i) => sum + g + (score.player2Games[i] || 0), 0);
+  const totalGames = score.player1Games.reduce(
+    (sum, g, i) => sum + g + (score.player2Games[i] || 0),
+    0
+  );
 
   // 格式化各盘比分
   const formatSetScores = () => {
@@ -58,7 +61,13 @@ export default function ResultScreen() {
                 <Text style={styles.setScore}>{score.player1Points}</Text>
               ) : (
                 score.player1Games.map((g, i) => (
-                  <Text key={i} style={[styles.setScore, i < score.player1Games.length - 1 && styles.setScoreMargin]}>
+                  <Text
+                    key={i}
+                    style={[
+                      styles.setScore,
+                      i < score.player1Games.length - 1 && styles.setScoreMargin,
+                    ]}
+                  >
                     {g}
                   </Text>
                 ))
@@ -83,7 +92,13 @@ export default function ResultScreen() {
                 <Text style={styles.setScore}>{score.player2Points}</Text>
               ) : (
                 score.player2Games.map((g, i) => (
-                  <Text key={i} style={[styles.setScore, i < score.player2Games.length - 1 && styles.setScoreMargin]}>
+                  <Text
+                    key={i}
+                    style={[
+                      styles.setScore,
+                      i < score.player2Games.length - 1 && styles.setScoreMargin,
+                    ]}
+                  >
                     {g}
                   </Text>
                 ))

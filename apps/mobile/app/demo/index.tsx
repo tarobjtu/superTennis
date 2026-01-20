@@ -86,7 +86,7 @@ export default function DemoScreen() {
         const mockY = 100 + Math.random() * 300;
         const result = tennisAI.processDetection(mockX, mockY, 0.8 + Math.random() * 0.2);
         setCurrentResult(result);
-        setAiResults(prev => [...prev.slice(-30), result]);
+        setAiResults((prev) => [...prev.slice(-30), result]);
 
         if (result.bounceDetected) {
           setEvents(tennisAI.getMatchEvents());
@@ -126,7 +126,7 @@ export default function DemoScreen() {
 
       const result = tennisAI.processDetection(x, y, 0.85 + Math.random() * 0.1);
       setCurrentResult(result);
-      setAiResults(prev => [...prev.slice(-50), result]);
+      setAiResults((prev) => [...prev.slice(-50), result]);
 
       // 每 3 秒模拟一次落地
       if (frameCount % 90 === 0) {
@@ -139,7 +139,7 @@ export default function DemoScreen() {
         // 自动记分
         if (!bounce.isIn) {
           // 出界，对方得分
-          setScore(prev => ({
+          setScore((prev) => ({
             ...prev,
             player2: prev.player2 + 1,
           }));
@@ -147,7 +147,7 @@ export default function DemoScreen() {
         } else if (Math.random() > 0.5) {
           // 界内，随机决定谁得分
           const winner = Math.random() > 0.5 ? 1 : 2;
-          setScore(prev => ({
+          setScore((prev) => ({
             ...prev,
             [winner === 1 ? 'player1' : 'player2']: prev[winner === 1 ? 'player1' : 'player2'] + 1,
           }));
@@ -197,7 +197,7 @@ export default function DemoScreen() {
         const mockResult: BallLandingResult = {
           isIn: Math.random() > 0.3,
           confidence: 85 + Math.random() * 12,
-          distanceFromLine: (Math.random() * 50 - 25),
+          distanceFromLine: Math.random() * 50 - 25,
           landingPoint: { x: Math.random() * 10 - 5, y: Math.random() * 20 - 10 },
           lineType: ['baseline', 'sideline', 'service_line'][Math.floor(Math.random() * 3)] as any,
           timestamp: Date.now(),
@@ -247,20 +247,14 @@ export default function DemoScreen() {
               onPress={simulationMode ? stopSimulation : startSimulation}
             >
               <Text style={styles.modeButtonIcon}>🎮</Text>
-              <Text style={styles.modeButtonText}>
-                {simulationMode ? '停止模拟' : '模拟模式'}
-              </Text>
-              <Text style={styles.modeButtonDesc}>
-                自动生成测试数据
-              </Text>
+              <Text style={styles.modeButtonText}>{simulationMode ? '停止模拟' : '模拟模式'}</Text>
+              <Text style={styles.modeButtonDesc}>自动生成测试数据</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.modeButton} onPress={pickVideo}>
               <Text style={styles.modeButtonIcon}>📹</Text>
               <Text style={styles.modeButtonText}>选择视频</Text>
-              <Text style={styles.modeButtonDesc}>
-                从相册导入网球视频
-              </Text>
+              <Text style={styles.modeButtonDesc}>从相册导入网球视频</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -331,8 +325,8 @@ export default function DemoScreen() {
                 {currentResult?.bounceDetected
                   ? `⚡ 检测到落地 - ${currentResult.isInBounds ? '界内' : '出界'}`
                   : currentResult?.ballDetected
-                  ? '🎾 追踪中...'
-                  : '⏳ 等待检测...'}
+                    ? '🎾 追踪中...'
+                    : '⏳ 等待检测...'}
               </Text>
               {currentResult?.estimatedSpeed && (
                 <Text style={styles.aiSpeedText}>
@@ -377,21 +371,23 @@ export default function DemoScreen() {
           <View style={styles.eventsSection}>
             <Text style={styles.sectionTitle}>比赛事件 ({events.length})</Text>
             <ScrollView style={styles.eventsList} nestedScrollEnabled>
-              {events.slice(-10).reverse().map((event, index) => (
-                <View key={index} style={styles.eventItem}>
-                  <Text style={styles.eventType}>
-                    {event.type === 'bounce' && '🎾'}
-                    {event.type === 'out' && '❌'}
-                    {event.type === 'shot' && '🎯'}
-                    {event.type === 'point_start' && '▶️'}
-                    {event.type === 'point_end' && '⏹️'}
-                    {' '}{event.type}
-                  </Text>
-                  <Text style={styles.eventTime}>
-                    {new Date(event.timestamp).toLocaleTimeString()}
-                  </Text>
-                </View>
-              ))}
+              {events
+                .slice(-10)
+                .reverse()
+                .map((event, index) => (
+                  <View key={index} style={styles.eventItem}>
+                    <Text style={styles.eventType}>
+                      {event.type === 'bounce' && '🎾'}
+                      {event.type === 'out' && '❌'}
+                      {event.type === 'shot' && '🎯'}
+                      {event.type === 'point_start' && '▶️'}
+                      {event.type === 'point_end' && '⏹️'} {event.type}
+                    </Text>
+                    <Text style={styles.eventTime}>
+                      {new Date(event.timestamp).toLocaleTimeString()}
+                    </Text>
+                  </View>
+                ))}
             </ScrollView>
           </View>
         )}
@@ -404,12 +400,14 @@ export default function DemoScreen() {
             styles.hawkEyeOverlay,
             {
               opacity: hawkEyeAnim,
-              transform: [{
-                scale: hawkEyeAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.9, 1],
-                }),
-              }],
+              transform: [
+                {
+                  scale: hawkEyeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.9, 1],
+                  }),
+                },
+              ],
             },
           ]}
         >
@@ -426,16 +424,14 @@ export default function DemoScreen() {
               </View>
             ) : (
               <>
-                <View style={[
-                  styles.hawkEyeResultBadge,
-                  hawkEyeResult.isIn ? styles.hawkEyeIn : styles.hawkEyeOut,
-                ]}>
-                  <Text style={styles.hawkEyeResultIcon}>
-                    {hawkEyeResult.isIn ? '✓' : '✗'}
-                  </Text>
-                  <Text style={styles.hawkEyeResultText}>
-                    {hawkEyeResult.isIn ? 'IN' : 'OUT'}
-                  </Text>
+                <View
+                  style={[
+                    styles.hawkEyeResultBadge,
+                    hawkEyeResult.isIn ? styles.hawkEyeIn : styles.hawkEyeOut,
+                  ]}
+                >
+                  <Text style={styles.hawkEyeResultIcon}>{hawkEyeResult.isIn ? '✓' : '✗'}</Text>
+                  <Text style={styles.hawkEyeResultText}>{hawkEyeResult.isIn ? 'IN' : 'OUT'}</Text>
                 </View>
 
                 <View style={styles.hawkEyeDetails}>
@@ -448,10 +444,12 @@ export default function DemoScreen() {
                   <View style={styles.hawkEyeDetailDivider} />
                   <View style={styles.hawkEyeDetailItem}>
                     <Text style={styles.hawkEyeDetailLabel}>距边线</Text>
-                    <Text style={[
-                      styles.hawkEyeDetailValue,
-                      { color: hawkEyeResult.isIn ? '#10B981' : '#EF4444' },
-                    ]}>
+                    <Text
+                      style={[
+                        styles.hawkEyeDetailValue,
+                        { color: hawkEyeResult.isIn ? '#10B981' : '#EF4444' },
+                      ]}
+                    >
                       {Math.abs(hawkEyeResult.distanceFromLine).toFixed(1)}mm
                     </Text>
                   </View>
@@ -471,19 +469,13 @@ export default function DemoScreen() {
                   />
                 </View>
 
-                <TouchableOpacity
-                  style={styles.hawkEyeDismiss}
-                  onPress={dismissHawkEye}
-                >
+                <TouchableOpacity style={styles.hawkEyeDismiss} onPress={dismissHawkEye}>
                   <Text style={styles.hawkEyeDismissText}>关闭</Text>
                 </TouchableOpacity>
               </>
             )}
 
-            <TouchableOpacity
-              style={styles.hawkEyeClose}
-              onPress={dismissHawkEye}
-            >
+            <TouchableOpacity style={styles.hawkEyeClose} onPress={dismissHawkEye}>
               <Text style={styles.hawkEyeCloseText}>✕</Text>
             </TouchableOpacity>
           </View>

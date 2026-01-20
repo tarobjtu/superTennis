@@ -1,5 +1,13 @@
 import { useState, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Pressable, Dimensions, GestureResponderEvent } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Pressable,
+  Dimensions,
+  GestureResponderEvent,
+} from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -52,11 +60,20 @@ export default function CalibrationScreen() {
     // 使用 setTimeout 确保在布局完成后测量
     setTimeout(() => {
       if (cameraRef.current) {
-        cameraRef.current.measure((fx: number, fy: number, fwidth: number, fheight: number, pageX: number, pageY: number) => {
-          if (pageX !== undefined && pageY !== undefined) {
-            setCameraLayout({ x: pageX, y: pageY, width: fwidth, height: fheight });
+        cameraRef.current.measure(
+          (
+            fx: number,
+            fy: number,
+            fwidth: number,
+            fheight: number,
+            pageX: number,
+            pageY: number
+          ) => {
+            if (pageX !== undefined && pageY !== undefined) {
+              setCameraLayout({ x: pageX, y: pageY, width: fwidth, height: fheight });
+            }
           }
-        });
+        );
       }
     }, 100);
   }, []);
@@ -68,7 +85,7 @@ export default function CalibrationScreen() {
 
   const handleStartMatch = () => {
     // 保存校准数据
-    const validPoints = points.filter(p => p !== null) as { x: number; y: number }[];
+    const validPoints = points.filter((p) => p !== null) as { x: number; y: number }[];
     if (setCalibration) {
       setCalibration(validPoints);
     }
@@ -149,9 +166,7 @@ export default function CalibrationScreen() {
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionTitle}>需要相机权限</Text>
-          <Text style={styles.permissionText}>
-            球场校准需要使用相机来识别球场边线
-          </Text>
+          <Text style={styles.permissionText}>球场校准需要使用相机来识别球场边线</Text>
           <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
             <Text style={styles.permissionButtonText}>授予权限</Text>
           </TouchableOpacity>
@@ -164,11 +179,7 @@ export default function CalibrationScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       {/* 相机预览区域 */}
-      <View
-        ref={cameraRef}
-        style={styles.cameraPreview}
-        onLayout={handleCameraLayout}
-      >
+      <View ref={cameraRef} style={styles.cameraPreview} onLayout={handleCameraLayout}>
         {/* 相机视图 */}
         <CameraView style={styles.camera} facing="back" />
 
@@ -190,10 +201,7 @@ export default function CalibrationScreen() {
               point ? (
                 <View
                   key={index}
-                  style={[
-                    styles.markedPoint,
-                    { left: point.x - 15, top: point.y - 15 },
-                  ]}
+                  style={[styles.markedPoint, { left: point.x - 15, top: point.y - 15 }]}
                 >
                   <Text style={styles.markedPointNumber}>{index + 1}</Text>
                 </View>
@@ -213,9 +221,7 @@ export default function CalibrationScreen() {
                 <View style={styles.instructionBadge}>
                   <Text style={styles.instructionBadgeText}>{step}/4</Text>
                 </View>
-                <Text style={styles.instructionText}>
-                  {cornerInstructions[step - 1]}
-                </Text>
+                <Text style={styles.instructionText}>{cornerInstructions[step - 1]}</Text>
               </View>
             )}
 
@@ -276,9 +282,7 @@ export default function CalibrationScreen() {
           onPress={handleStartMatch}
           disabled={!allPointsMarked}
         >
-          <Text style={styles.nextButtonText}>
-            {allPointsMarked ? '开始比赛！' : '请完成校准'}
-          </Text>
+          <Text style={styles.nextButtonText}>{allPointsMarked ? '开始比赛！' : '请完成校准'}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

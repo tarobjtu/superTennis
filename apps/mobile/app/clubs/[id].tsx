@@ -54,10 +54,38 @@ export default function ClubDetailScreen() {
 
       // 模拟成员数据
       const mockMembers: ClubMember[] = [
-        { id: '1', name: '张三', role: 'admin', joinedAt: '2024-01-15', matchesPlayed: 42, winRate: 68 },
-        { id: '2', name: '李四', role: 'member', joinedAt: '2024-02-20', matchesPlayed: 28, winRate: 55 },
-        { id: '3', name: '王五', role: 'member', joinedAt: '2024-03-10', matchesPlayed: 35, winRate: 62 },
-        { id: '4', name: '赵六', role: 'member', joinedAt: '2024-03-25', matchesPlayed: 19, winRate: 47 },
+        {
+          id: '1',
+          name: '张三',
+          role: 'admin',
+          joinedAt: '2024-01-15',
+          matchesPlayed: 42,
+          winRate: 68,
+        },
+        {
+          id: '2',
+          name: '李四',
+          role: 'member',
+          joinedAt: '2024-02-20',
+          matchesPlayed: 28,
+          winRate: 55,
+        },
+        {
+          id: '3',
+          name: '王五',
+          role: 'member',
+          joinedAt: '2024-03-10',
+          matchesPlayed: 35,
+          winRate: 62,
+        },
+        {
+          id: '4',
+          name: '赵六',
+          role: 'member',
+          joinedAt: '2024-03-25',
+          matchesPlayed: 19,
+          winRate: 47,
+        },
       ];
       setMembers(mockMembers);
 
@@ -99,27 +127,23 @@ export default function ClubDetailScreen() {
   const handleLeave = async () => {
     if (!user?.id || !id) return;
 
-    Alert.alert(
-      '退出俱乐部',
-      `确定要退出 ${club?.name} 吗？`,
-      [
-        { text: '取消', style: 'cancel' },
-        {
-          text: '确定退出',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await clubsApi.leave(id, user.id);
-              setIsMember(false);
-              Alert.alert('已退出', '你已退出该俱乐部');
-              router.back();
-            } catch (error) {
-              Alert.alert('操作失败', '请稍后重试');
-            }
-          },
+    Alert.alert('退出俱乐部', `确定要退出 ${club?.name} 吗？`, [
+      { text: '取消', style: 'cancel' },
+      {
+        text: '确定退出',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await clubsApi.leave(id, user.id);
+            setIsMember(false);
+            Alert.alert('已退出', '你已退出该俱乐部');
+            router.back();
+          } catch (error) {
+            Alert.alert('操作失败', '请稍后重试');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleShareInvite = async () => {
@@ -135,41 +159,33 @@ export default function ClubDetailScreen() {
   const handleRemoveMember = (memberId: string, memberName: string) => {
     if (!isAdmin) return;
 
-    Alert.alert(
-      '移除成员',
-      `确定要将 ${memberName} 移出俱乐部吗？`,
-      [
-        { text: '取消', style: 'cancel' },
-        {
-          text: '确定移除',
-          style: 'destructive',
-          onPress: async () => {
-            // TODO: API 调用
-            setMembers(members.filter(m => m.id !== memberId));
-          },
+    Alert.alert('移除成员', `确定要将 ${memberName} 移出俱乐部吗？`, [
+      { text: '取消', style: 'cancel' },
+      {
+        text: '确定移除',
+        style: 'destructive',
+        onPress: async () => {
+          // TODO: API 调用
+          setMembers(members.filter((m) => m.id !== memberId));
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleSetAdmin = (memberId: string, memberName: string) => {
     if (!isAdmin) return;
 
-    Alert.alert(
-      '设为管理员',
-      `确定要将 ${memberName} 设为管理员吗？`,
-      [
-        { text: '取消', style: 'cancel' },
-        {
-          text: '确定',
-          onPress: async () => {
-            setMembers(members.map(m =>
-              m.id === memberId ? { ...m, role: 'admin' as const } : m
-            ));
-          },
+    Alert.alert('设为管理员', `确定要将 ${memberName} 设为管理员吗？`, [
+      { text: '取消', style: 'cancel' },
+      {
+        text: '确定',
+        onPress: async () => {
+          setMembers(
+            members.map((m) => (m.id === memberId ? { ...m, role: 'admin' as const } : m))
+          );
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const renderMemberCard = ({ item }: { item: ClubMember }) => (
@@ -177,22 +193,20 @@ export default function ClubDetailScreen() {
       style={styles.memberCard}
       onLongPress={() => {
         if (isAdmin && item.id !== user?.id) {
-          Alert.alert(
-            item.name,
-            '选择操作',
-            [
-              { text: '取消', style: 'cancel' },
-              { text: '设为管理员', onPress: () => handleSetAdmin(item.id, item.name) },
-              { text: '移出俱乐部', style: 'destructive', onPress: () => handleRemoveMember(item.id, item.name) },
-            ]
-          );
+          Alert.alert(item.name, '选择操作', [
+            { text: '取消', style: 'cancel' },
+            { text: '设为管理员', onPress: () => handleSetAdmin(item.id, item.name) },
+            {
+              text: '移出俱乐部',
+              style: 'destructive',
+              onPress: () => handleRemoveMember(item.id, item.name),
+            },
+          ]);
         }
       }}
     >
       <View style={styles.memberAvatar}>
-        <Text style={styles.memberAvatarText}>
-          {item.avatar || item.name.charAt(0)}
-        </Text>
+        <Text style={styles.memberAvatarText}>{item.avatar || item.name.charAt(0)}</Text>
       </View>
       <View style={styles.memberInfo}>
         <View style={styles.memberNameRow}>
@@ -223,23 +237,20 @@ export default function ClubDetailScreen() {
 
   const renderRankingItem = ({ item, index }: { item: ClubMember; index: number }) => (
     <View style={styles.rankingItem}>
-      <View style={[
-        styles.rankNumber,
-        index === 0 && styles.rankGold,
-        index === 1 && styles.rankSilver,
-        index === 2 && styles.rankBronze,
-      ]}>
-        <Text style={[
-          styles.rankNumberText,
-          index < 3 && styles.rankNumberTextTop,
-        ]}>
+      <View
+        style={[
+          styles.rankNumber,
+          index === 0 && styles.rankGold,
+          index === 1 && styles.rankSilver,
+          index === 2 && styles.rankBronze,
+        ]}
+      >
+        <Text style={[styles.rankNumberText, index < 3 && styles.rankNumberTextTop]}>
           {index + 1}
         </Text>
       </View>
       <View style={styles.rankAvatar}>
-        <Text style={styles.rankAvatarText}>
-          {item.avatar || item.name.charAt(0)}
-        </Text>
+        <Text style={styles.rankAvatarText}>{item.avatar || item.name.charAt(0)}</Text>
       </View>
       <View style={styles.rankInfo}>
         <Text style={styles.rankName}>{item.name}</Text>
@@ -268,18 +279,17 @@ export default function ClubDetailScreen() {
         options={{
           headerShown: true,
           title: club.name,
-          headerRight: () => isAdmin ? (
-            <TouchableOpacity onPress={() => setShowInviteModal(true)}>
-              <Text style={styles.inviteButton}>邀请</Text>
-            </TouchableOpacity>
-          ) : null,
+          headerRight: () =>
+            isAdmin ? (
+              <TouchableOpacity onPress={() => setShowInviteModal(true)}>
+                <Text style={styles.inviteButton}>邀请</Text>
+              </TouchableOpacity>
+            ) : null,
         }}
       />
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <ScrollView
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {/* 俱乐部信息卡片 */}
           <View style={styles.headerCard}>
@@ -287,12 +297,8 @@ export default function ClubDetailScreen() {
               <Text style={styles.clubLogoText}>{club.avatar || '🎾'}</Text>
             </View>
             <Text style={styles.clubName}>{club.name}</Text>
-            {club.location && (
-              <Text style={styles.clubLocation}>📍 {club.location}</Text>
-            )}
-            {club.description && (
-              <Text style={styles.clubDescription}>{club.description}</Text>
-            )}
+            {club.location && <Text style={styles.clubLocation}>📍 {club.location}</Text>}
+            {club.description && <Text style={styles.clubDescription}>{club.description}</Text>}
 
             {/* 统计数据 */}
             <View style={styles.statsRow}>
@@ -328,10 +334,7 @@ export default function ClubDetailScreen() {
                   <Text style={styles.actionButtonIcon}>🎾</Text>
                   <Text style={styles.actionButtonText}>发起比赛</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={handleShareInvite}
-                >
+                <TouchableOpacity style={styles.actionButton} onPress={handleShareInvite}>
                   <Text style={styles.actionButtonIcon}>📤</Text>
                   <Text style={styles.actionButtonText}>邀请好友</Text>
                 </TouchableOpacity>
@@ -380,9 +383,7 @@ export default function ClubDetailScreen() {
           {activeTab === 'members' && (
             <View style={styles.contentSection}>
               {members.map((member) => (
-                <View key={member.id}>
-                  {renderMemberCard({ item: member })}
-                </View>
+                <View key={member.id}>{renderMemberCard({ item: member })}</View>
               ))}
             </View>
           )}
@@ -392,9 +393,7 @@ export default function ClubDetailScreen() {
               {members
                 .sort((a, b) => b.winRate - a.winRate)
                 .map((member, index) => (
-                  <View key={member.id}>
-                    {renderRankingItem({ item: member, index })}
-                  </View>
+                  <View key={member.id}>{renderRankingItem({ item: member, index })}</View>
                 ))}
             </View>
           )}
@@ -428,10 +427,7 @@ export default function ClubDetailScreen() {
                 <Text style={styles.inviteCode}>{inviteCode}</Text>
               </View>
 
-              <TouchableOpacity
-                style={styles.shareButton}
-                onPress={handleShareInvite}
-              >
+              <TouchableOpacity style={styles.shareButton} onPress={handleShareInvite}>
                 <Text style={styles.shareButtonText}>分享邀请</Text>
               </TouchableOpacity>
 

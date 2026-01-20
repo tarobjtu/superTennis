@@ -8,14 +8,16 @@ const prisma = new PrismaClient();
 // 创建视频记录
 router.post('/', async (req, res) => {
   try {
-    const data = z.object({
-      matchId: z.string(),
-      userId: z.string(),
-      filePath: z.string(),
-      duration: z.number().optional(),
-      fileSize: z.number().optional(),
-      thumbnailPath: z.string().optional(),
-    }).parse(req.body);
+    const data = z
+      .object({
+        matchId: z.string(),
+        userId: z.string(),
+        filePath: z.string(),
+        duration: z.number().optional(),
+        fileSize: z.number().optional(),
+        thumbnailPath: z.string().optional(),
+      })
+      .parse(req.body);
 
     const video = await prisma.matchVideo.create({ data });
     res.status(201).json(video);
@@ -72,15 +74,17 @@ router.delete('/:id', async (req, res) => {
 // 创建精彩集锦
 router.post('/highlights', async (req, res) => {
   try {
-    const data = z.object({
-      videoId: z.string(),
-      matchId: z.string(),
-      userId: z.string(),
-      startTime: z.number(),
-      endTime: z.number(),
-      title: z.string().optional(),
-      description: z.string().optional(),
-    }).parse(req.body);
+    const data = z
+      .object({
+        videoId: z.string(),
+        matchId: z.string(),
+        userId: z.string(),
+        startTime: z.number(),
+        endTime: z.number(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+      })
+      .parse(req.body);
 
     const highlight = await prisma.highlight.create({ data });
     res.status(201).json(highlight);

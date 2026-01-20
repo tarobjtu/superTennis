@@ -127,10 +127,7 @@ export default function FriendsScreen() {
           </Text>
         </View>
       </View>
-      <TouchableOpacity
-        style={styles.inviteButton}
-        onPress={() => handleInviteMatch(item)}
-      >
+      <TouchableOpacity style={styles.inviteButton} onPress={() => handleInviteMatch(item)}>
         <Text style={styles.inviteButtonText}>约战</Text>
       </TouchableOpacity>
     </View>
@@ -144,22 +141,14 @@ export default function FriendsScreen() {
         </View>
         <View style={styles.friendDetails}>
           <Text style={styles.friendName}>{item.requester?.name || '未知用户'}</Text>
-          <Text style={styles.friendLevel}>
-            水平 {item.requester?.level?.toFixed(1) || '3.5'}
-          </Text>
+          <Text style={styles.friendLevel}>水平 {item.requester?.level?.toFixed(1) || '3.5'}</Text>
         </View>
       </View>
       <View style={styles.requestActions}>
-        <TouchableOpacity
-          style={styles.acceptButton}
-          onPress={() => handleAcceptRequest(item.id)}
-        >
+        <TouchableOpacity style={styles.acceptButton} onPress={() => handleAcceptRequest(item.id)}>
           <Text style={styles.acceptButtonText}>接受</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.rejectButton}
-          onPress={() => handleRejectRequest(item.id)}
-        >
+        <TouchableOpacity style={styles.rejectButton} onPress={() => handleRejectRequest(item.id)}>
           <Text style={styles.rejectButtonText}>拒绝</Text>
         </TouchableOpacity>
       </View>
@@ -179,10 +168,7 @@ export default function FriendsScreen() {
           </Text>
         </View>
       </View>
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => handleSendRequest(item.id)}
-      >
+      <TouchableOpacity style={styles.addButton} onPress={() => handleSendRequest(item.id)}>
         <Text style={styles.addButtonText}>添加</Text>
       </TouchableOpacity>
     </View>
@@ -203,9 +189,7 @@ export default function FriendsScreen() {
             style={[styles.tab, activeTab === 'friends' && styles.tabActive]}
             onPress={() => setActiveTab('friends')}
           >
-            <Text
-              style={[styles.tabText, activeTab === 'friends' && styles.tabTextActive]}
-            >
+            <Text style={[styles.tabText, activeTab === 'friends' && styles.tabTextActive]}>
               好友 ({friends.length})
             </Text>
           </TouchableOpacity>
@@ -213,9 +197,7 @@ export default function FriendsScreen() {
             style={[styles.tab, activeTab === 'requests' && styles.tabActive]}
             onPress={() => setActiveTab('requests')}
           >
-            <Text
-              style={[styles.tabText, activeTab === 'requests' && styles.tabTextActive]}
-            >
+            <Text style={[styles.tabText, activeTab === 'requests' && styles.tabTextActive]}>
               请求 ({pendingRequests.length})
             </Text>
             {pendingRequests.length > 0 && <View style={styles.badge} />}
@@ -224,9 +206,7 @@ export default function FriendsScreen() {
             style={[styles.tab, activeTab === 'search' && styles.tabActive]}
             onPress={() => setActiveTab('search')}
           >
-            <Text
-              style={[styles.tabText, activeTab === 'search' && styles.tabTextActive]}
-            >
+            <Text style={[styles.tabText, activeTab === 'search' && styles.tabTextActive]}>
               搜索
             </Text>
           </TouchableOpacity>

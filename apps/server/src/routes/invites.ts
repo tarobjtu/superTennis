@@ -8,13 +8,15 @@ const prisma = new PrismaClient();
 // 创建比赛邀请
 router.post('/', async (req, res) => {
   try {
-    const data = z.object({
-      inviterId: z.string(),
-      inviteeId: z.string(),
-      matchTime: z.string().transform((s) => new Date(s)),
-      location: z.string().optional(),
-      message: z.string().optional(),
-    }).parse(req.body);
+    const data = z
+      .object({
+        inviterId: z.string(),
+        inviteeId: z.string(),
+        matchTime: z.string().transform((s) => new Date(s)),
+        location: z.string().optional(),
+        message: z.string().optional(),
+      })
+      .parse(req.body);
 
     const invite = await prisma.matchInvite.create({ data });
 

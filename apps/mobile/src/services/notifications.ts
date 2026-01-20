@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import { SchedulableTriggerInputTypes } from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { notificationsApi } from './api';
@@ -9,6 +10,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -44,11 +47,7 @@ export async function registerForPushNotificationsAsync(userId: string): Promise
     token = tokenData.data;
 
     // 注册到服务器
-    await notificationsApi.registerPushToken(
-      userId,
-      token,
-      Platform.OS
-    );
+    await notificationsApi.registerPushToken(userId, token, Platform.OS);
 
     console.log('Push token registered:', token);
   } catch (error) {
@@ -107,7 +106,7 @@ export async function scheduleMatchReminder(
       data: { matchId, type: 'match_reminder' },
       sound: true,
     },
-    trigger: reminderTime,
+    trigger: { type: SchedulableTriggerInputTypes.DATE, date: reminderTime },
   });
 
   console.log('Match reminder scheduled for:', reminderTime);

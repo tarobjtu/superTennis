@@ -15,8 +15,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions, CameraType } from 'expo-camera';
-import { router, Stack } from 'expo-router';
-import { RealTimeBallTracker, DetectedBall, TENNIS_BALL_COLOR } from '../../src/services/ballDetection';
+import { Stack } from 'expo-router';
+import {
+  RealTimeBallTracker,
+  DetectedBall,
+  TENNIS_BALL_COLOR,
+  rgbToHsv,
+  isTennisBallColor,
+} from '../../src/services/ballDetection';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -51,7 +57,7 @@ export default function HawkEyeTestScreen() {
 
   // 添加调试日志
   const addLog = useCallback((message: string) => {
-    setDebugInfo(prev => {
+    setDebugInfo((prev) => {
       const newLogs = [...prev, `[${new Date().toLocaleTimeString()}] ${message}`];
       return newLogs.slice(-20); // 保留最近20条
     });
@@ -66,7 +72,7 @@ export default function HawkEyeTestScreen() {
 
   // 切换摄像头
   const toggleCameraFacing = () => {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
+    setFacing((current) => (current === 'back' ? 'front' : 'back'));
     addLog(`切换到${facing === 'back' ? '前置' : '后置'}摄像头`);
   };
 
@@ -91,7 +97,7 @@ export default function HawkEyeTestScreen() {
     setTestMode('results');
 
     const debugInfo = trackerRef.current.getDebugInfo();
-    setStats(prev => ({
+    setStats((prev) => ({
       ...prev,
       avgFPS: debugInfo.fps,
       avgProcessingTime: debugInfo.avgProcessingTime,
@@ -108,17 +114,20 @@ export default function HawkEyeTestScreen() {
 
     // 模拟检测结果
     // 实际应用中，这里需要接入真实的帧数据
-    const mockDetection: DetectedBall | null = Math.random() > 0.7 ? {
-      x: Math.random() * SCREEN_WIDTH,
-      y: Math.random() * SCREEN_HEIGHT * 0.6,
-      radius: 15 + Math.random() * 10,
-      confidence: 60 + Math.random() * 35,
-      timestamp: now,
-    } : null;
+    const mockDetection: DetectedBall | null =
+      Math.random() > 0.7
+        ? {
+            x: Math.random() * SCREEN_WIDTH,
+            y: Math.random() * SCREEN_HEIGHT * 0.6,
+            radius: 15 + Math.random() * 10,
+            confidence: 60 + Math.random() * 35,
+            timestamp: now,
+          }
+        : null;
 
     if (mockDetection) {
-      setDetectedBalls(prev => [...prev.slice(-10), mockDetection]);
-      setStats(prev => ({
+      setDetectedBalls((prev) => [...prev.slice(-10), mockDetection]);
+      setStats((prev) => ({
         ...prev,
         ballsDetected: prev.ballsDetected + 1,
       }));
@@ -130,7 +139,7 @@ export default function HawkEyeTestScreen() {
       frameCountRef.current = 0;
       lastUpdateRef.current = now;
 
-      setStats(prev => ({
+      setStats((prev) => ({
         ...prev,
         framesProcessed: prev.framesProcessed + fps,
         avgFPS: fps,
@@ -161,12 +170,13 @@ export default function HawkEyeTestScreen() {
 
     let passed = 0;
     for (const color of testColors) {
-      const { rgbToHsv, isTennisBallColor } = require('../../src/services/ballDetection');
       const hsv = rgbToHsv(color.r, color.g, color.b);
       const isBall = isTennisBallColor(color.r, color.g, color.b);
       const result = isBall === color.expected;
 
-      addLog(`${color.name}: HSV(${hsv.h},${hsv.s},${hsv.v}) => ${isBall ? 'YES' : 'NO'} ${result ? '✓' : '✗'}`);
+      addLog(
+        `${color.name}: HSV(${hsv.h},${hsv.s},${hsv.v}) => ${isBall ? 'YES' : 'NO'} ${result ? '✓' : '✗'}`
+      );
       if (result) passed++;
     }
 
@@ -200,30 +210,28 @@ export default function HawkEyeTestScreen() {
       <View style={styles.container}>
         {/* 摄像头预览 */}
         <View style={styles.cameraContainer}>
-          <CameraView
-            style={styles.camera}
-            facing={facing}
-          />
+          <CameraView style={styles.camera} facing={facing} />
 
           {/* 检测到的球的可视化 */}
-          {testMode === 'tracking' && detectedBalls.map((ball, index) => (
-            <View
-              key={index}
-              style={[
-                styles.ballMarker,
-                {
-                  left: ball.x - ball.radius,
-                  top: ball.y - ball.radius,
-                  width: ball.radius * 2,
-                  height: ball.radius * 2,
-                  borderRadius: ball.radius,
-                  opacity: 0.3 + (index / detectedBalls.length) * 0.7,
-                },
-              ]}
-            >
-              <Text style={styles.ballConfidence}>{Math.round(ball.confidence)}%</Text>
-            </View>
-          ))}
+          {testMode === 'tracking' &&
+            detectedBalls.map((ball, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.ballMarker,
+                  {
+                    left: ball.x - ball.radius,
+                    top: ball.y - ball.radius,
+                    width: ball.radius * 2,
+                    height: ball.radius * 2,
+                    borderRadius: ball.radius,
+                    opacity: 0.3 + (index / detectedBalls.length) * 0.7,
+                  },
+                ]}
+              >
+                <Text style={styles.ballConfidence}>{Math.round(ball.confidence)}%</Text>
+              </View>
+            ))}
 
           {/* 测试模式标识 */}
           <View style={styles.modeIndicator}>
@@ -232,9 +240,7 @@ export default function HawkEyeTestScreen() {
               {testMode === 'tracking' && '追踪中...'}
               {testMode === 'results' && '测试结果'}
             </Text>
-            {isRecording && (
-              <View style={styles.recordingDot} />
-            )}
+            {isRecording && <View style={styles.recordingDot} />}
           </View>
 
           {/* 实时统计 */}
@@ -253,9 +259,9 @@ export default function HawkEyeTestScreen() {
           <View style={styles.colorInfo}>
             <Text style={styles.colorInfoTitle}>网球颜色范围 (HSV)</Text>
             <Text style={styles.colorInfoText}>
-              H: {TENNIS_BALL_COLOR.hue.min}-{TENNIS_BALL_COLOR.hue.max} |
-              S: {TENNIS_BALL_COLOR.saturation.min}-{TENNIS_BALL_COLOR.saturation.max} |
-              V: {TENNIS_BALL_COLOR.value.min}-{TENNIS_BALL_COLOR.value.max}
+              H: {TENNIS_BALL_COLOR.hue.min}-{TENNIS_BALL_COLOR.hue.max} | S:{' '}
+              {TENNIS_BALL_COLOR.saturation.min}-{TENNIS_BALL_COLOR.saturation.max} | V:{' '}
+              {TENNIS_BALL_COLOR.value.min}-{TENNIS_BALL_COLOR.value.max}
             </Text>
           </View>
 
@@ -280,7 +286,8 @@ export default function HawkEyeTestScreen() {
                 <Text style={styles.resultValue}>
                   {stats.framesProcessed > 0
                     ? Math.round((stats.ballsDetected / stats.framesProcessed) * 100)
-                    : 0}%
+                    : 0}
+                  %
                 </Text>
               </View>
             </View>
@@ -289,7 +296,9 @@ export default function HawkEyeTestScreen() {
           {/* 调试日志 */}
           <ScrollView style={styles.logContainer}>
             {debugInfo.map((log, index) => (
-              <Text key={index} style={styles.logText}>{log}</Text>
+              <Text key={index} style={styles.logText}>
+                {log}
+              </Text>
             ))}
           </ScrollView>
 

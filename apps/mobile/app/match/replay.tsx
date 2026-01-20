@@ -1,5 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ActivityIndicator, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+  ActivityIndicator,
+  ScrollView,
+} from 'react-native';
 import { router, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
@@ -174,10 +182,7 @@ export default function ReplayScreen() {
               {speedOptions.map((speed) => (
                 <TouchableOpacity
                   key={speed}
-                  style={[
-                    styles.speedOption,
-                    playbackSpeed === speed && styles.speedOptionActive,
-                  ]}
+                  style={[styles.speedOption, playbackSpeed === speed && styles.speedOptionActive]}
                   onPress={() => changeSpeed(speed)}
                 >
                   <Text
@@ -195,16 +200,20 @@ export default function ReplayScreen() {
         </View>
 
         {/* AI 判定结果 */}
-        <View style={[
-          styles.aiResultCard,
-          aiResult?.isIn ? styles.aiResultCardIn : styles.aiResultCardOut
-        ]}>
+        <View
+          style={[
+            styles.aiResultCard,
+            aiResult?.isIn ? styles.aiResultCardIn : styles.aiResultCardOut,
+          ]}
+        >
           <View style={styles.aiResultHeader}>
             <Text style={styles.aiResultIcon}>🤖</Text>
-            <Text style={[
-              styles.aiResultTitle,
-              aiResult?.isIn ? styles.aiResultTitleIn : styles.aiResultTitleOut
-            ]}>
+            <Text
+              style={[
+                styles.aiResultTitle,
+                aiResult?.isIn ? styles.aiResultTitleIn : styles.aiResultTitleOut,
+              ]}
+            >
               AI 判定: {aiResult ? (aiResult.isIn ? 'IN' : 'OUT') : '分析中...'}
             </Text>
           </View>
@@ -221,8 +230,7 @@ export default function ReplayScreen() {
               <Text style={styles.aiResultValue}>
                 {aiResult
                   ? `约 ${(aiResult.distanceFromLine * 100).toFixed(1)}cm ${aiResult.isIn ? '(界内)' : '(出界)'}`
-                  : '--'
-                }
+                  : '--'}
               </Text>
             </View>
           </View>

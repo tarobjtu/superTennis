@@ -9,9 +9,9 @@ import { CalibrationPoint } from '../stores/matchStore';
 // 网球的典型颜色范围 (HSV)
 export const TENNIS_BALL_COLOR = {
   // 黄绿色网球
-  hue: { min: 25, max: 65 },      // 黄色到绿色
+  hue: { min: 25, max: 65 }, // 黄色到绿色
   saturation: { min: 100, max: 255 }, // 高饱和度
-  value: { min: 100, max: 255 },      // 中高亮度
+  value: { min: 100, max: 255 }, // 中高亮度
 };
 
 // 检测参数
@@ -176,7 +176,7 @@ export class RealTimeBallTracker {
       const totalCount = cluster.reduce((sum, c) => sum + c.count, 0);
 
       // 估计球的半径
-      const radius = Math.sqrt(cluster.length) * gridSize / 2;
+      const radius = (Math.sqrt(cluster.length) * gridSize) / 2;
 
       // 计算置信度
       const confidence = Math.min(100, (totalCount / (cluster.length * gridSize)) * 100);
@@ -186,7 +186,8 @@ export class RealTimeBallTracker {
       if (this.detectionHistory.length > 0) {
         const lastBall = this.detectionHistory[this.detectionHistory.length - 1];
         const dt = (Date.now() - lastBall.timestamp) / 1000; // 秒
-        if (dt > 0 && dt < 0.5) { // 合理的时间间隔
+        if (dt > 0 && dt < 0.5) {
+          // 合理的时间间隔
           velocity = {
             vx: (avgX - lastBall.x) / dt,
             vy: (avgY - lastBall.y) / dt,
@@ -346,7 +347,10 @@ export class RealTimeBallTracker {
     const predictedY = lastBall.y + avgVy * 0.5;
 
     // 置信度基于速度的一致性
-    const velocityConsistency = Math.min(100, 100 - Math.abs(avgVx - (recent[recent.length - 1].velocity?.vx || 0)));
+    const velocityConsistency = Math.min(
+      100,
+      100 - Math.abs(avgVx - (recent[recent.length - 1].velocity?.vx || 0))
+    );
 
     return {
       x: predictedX,

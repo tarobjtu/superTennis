@@ -20,10 +20,7 @@ const PROD_API_URL = 'https://api.supertennis.com'; // 生产环境地址
 const API_BASE_URL = __DEV__ ? DEV_API_URL : PROD_API_URL;
 
 // 通用请求函数
-async function request<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
+async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
   const config: RequestInit = {
@@ -207,20 +204,19 @@ export const friendsApi = {
     }),
 
   // 删除好友
-  remove: (id: string) =>
-    request<null>(`/api/friends/${id}`, { method: 'DELETE' }),
+  remove: (id: string) => request<null>(`/api/friends/${id}`, { method: 'DELETE' }),
 
   // 获取好友列表
-  getList: (userId: string) =>
-    request<User[]>(`/api/friends/list/${userId}`),
+  getList: (userId: string) => request<User[]>(`/api/friends/list/${userId}`),
 
   // 获取待处理的好友请求
-  getPending: (userId: string) =>
-    request<Friendship[]>(`/api/friends/pending/${userId}`),
+  getPending: (userId: string) => request<Friendship[]>(`/api/friends/pending/${userId}`),
 
   // 搜索用户
   searchUsers: (query: string, currentUserId: string) =>
-    request<User[]>(`/api/friends/search?query=${encodeURIComponent(query)}&currentUserId=${currentUserId}`),
+    request<User[]>(
+      `/api/friends/search?query=${encodeURIComponent(query)}&currentUserId=${currentUserId}`
+    ),
 };
 
 // Video 相关类型
@@ -260,16 +256,13 @@ export const videosApi = {
     }),
 
   // 获取用户视频
-  getByUser: (userId: string) =>
-    request<MatchVideo[]>(`/api/videos/user/${userId}`),
+  getByUser: (userId: string) => request<MatchVideo[]>(`/api/videos/user/${userId}`),
 
   // 获取比赛视频
-  getByMatch: (matchId: string) =>
-    request<MatchVideo[]>(`/api/videos/match/${matchId}`),
+  getByMatch: (matchId: string) => request<MatchVideo[]>(`/api/videos/match/${matchId}`),
 
   // 删除视频
-  delete: (id: string) =>
-    request<null>(`/api/videos/${id}`, { method: 'DELETE' }),
+  delete: (id: string) => request<null>(`/api/videos/${id}`, { method: 'DELETE' }),
 
   // 创建精彩集锦
   createHighlight: (data: Omit<Highlight, 'id' | 'createdAt'>) =>
@@ -279,8 +272,7 @@ export const videosApi = {
     }),
 
   // 获取用户精彩集锦
-  getHighlights: (userId: string) =>
-    request<Highlight[]>(`/api/videos/highlights/user/${userId}`),
+  getHighlights: (userId: string) => request<Highlight[]>(`/api/videos/highlights/user/${userId}`),
 
   // 删除精彩集锦
   deleteHighlight: (id: string) =>
@@ -302,8 +294,7 @@ export interface Notification {
 // Notifications API
 export const notificationsApi = {
   // 获取通知列表
-  getAll: (userId: string) =>
-    request<Notification[]>(`/api/notifications/user/${userId}`),
+  getAll: (userId: string) => request<Notification[]>(`/api/notifications/user/${userId}`),
 
   // 获取未读数量
   getUnreadCount: async (userId: string) => {
@@ -320,8 +311,7 @@ export const notificationsApi = {
     request<{ success: boolean }>(`/api/notifications/read-all/${userId}`, { method: 'PATCH' }),
 
   // 删除通知
-  delete: (id: string) =>
-    request<null>(`/api/notifications/${id}`, { method: 'DELETE' }),
+  delete: (id: string) => request<null>(`/api/notifications/${id}`, { method: 'DELETE' }),
 
   // 注册推送 token
   registerPushToken: (userId: string, token: string, platform: string) =>
@@ -348,31 +338,32 @@ export interface MatchInvite {
 // Invites API
 export const invitesApi = {
   // 创建邀请
-  create: (data: { inviterId: string; inviteeId: string; matchTime: string; location?: string; message?: string }) =>
+  create: (data: {
+    inviterId: string;
+    inviteeId: string;
+    matchTime: string;
+    location?: string;
+    message?: string;
+  }) =>
     request<MatchInvite>('/api/invites', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   // 获取收到的邀请
-  getReceived: (userId: string) =>
-    request<MatchInvite[]>(`/api/invites/received/${userId}`),
+  getReceived: (userId: string) => request<MatchInvite[]>(`/api/invites/received/${userId}`),
 
   // 获取发出的邀请
-  getSent: (userId: string) =>
-    request<MatchInvite[]>(`/api/invites/sent/${userId}`),
+  getSent: (userId: string) => request<MatchInvite[]>(`/api/invites/sent/${userId}`),
 
   // 接受邀请
-  accept: (id: string) =>
-    request<MatchInvite>(`/api/invites/${id}/accept`, { method: 'PATCH' }),
+  accept: (id: string) => request<MatchInvite>(`/api/invites/${id}/accept`, { method: 'PATCH' }),
 
   // 拒绝邀请
-  decline: (id: string) =>
-    request<MatchInvite>(`/api/invites/${id}/decline`, { method: 'PATCH' }),
+  decline: (id: string) => request<MatchInvite>(`/api/invites/${id}/decline`, { method: 'PATCH' }),
 
   // 删除邀请
-  delete: (id: string) =>
-    request<null>(`/api/invites/${id}`, { method: 'DELETE' }),
+  delete: (id: string) => request<null>(`/api/invites/${id}`, { method: 'DELETE' }),
 };
 
 // Leaderboard 相关类型
@@ -413,8 +404,7 @@ export const leaderboardApi = {
     request<any[]>(`/api/leaderboard/top/${period}?limit=${limit}`),
 
   // 匹配对手
-  findMatch: (userId: string) =>
-    request<any[]>(`/api/leaderboard/match/${userId}`),
+  findMatch: (userId: string) => request<any[]>(`/api/leaderboard/match/${userId}`),
 
   // 更新比赛后评分
   updateRatings: (matchId: string, winnerId: string, loserId: string) =>
@@ -463,7 +453,9 @@ export interface Achievement {
 export const trainingApi = {
   // 获取训练类型
   getTypes: () =>
-    request<{ id: string; name: string; icon: string; description: string }[]>('/api/training/types'),
+    request<{ id: string; name: string; icon: string; description: string }[]>(
+      '/api/training/types'
+    ),
 
   // 开始训练
   startSession: (userId: string, type: string) =>
@@ -481,11 +473,12 @@ export const trainingApi = {
 
   // 获取训练历史
   getSessions: (userId: string, type?: string, limit = 20) =>
-    request<TrainingSession[]>(`/api/training/sessions/user/${userId}?${type ? `type=${type}&` : ''}limit=${limit}`),
+    request<TrainingSession[]>(
+      `/api/training/sessions/user/${userId}?${type ? `type=${type}&` : ''}limit=${limit}`
+    ),
 
   // 获取训练统计
-  getStats: (userId: string) =>
-    request<any>(`/api/training/stats/${userId}`),
+  getStats: (userId: string) => request<any>(`/api/training/stats/${userId}`),
 
   // 创建目标
   createGoal: (data: Omit<TrainingGoal, 'id' | 'current' | 'isCompleted'>) =>
@@ -495,8 +488,7 @@ export const trainingApi = {
     }),
 
   // 获取目标
-  getGoals: (userId: string) =>
-    request<TrainingGoal[]>(`/api/training/goals/${userId}`),
+  getGoals: (userId: string) => request<TrainingGoal[]>(`/api/training/goals/${userId}`),
 
   // 更新目标进度
   updateGoalProgress: (id: string, current: number) =>
@@ -533,7 +525,13 @@ export interface ClubMember {
 // Clubs API
 export const clubsApi = {
   // 创建俱乐部
-  create: (data: { name: string; description?: string; avatar?: string; location?: string; creatorId: string }) =>
+  create: (data: {
+    name: string;
+    description?: string;
+    avatar?: string;
+    location?: string;
+    creatorId: string;
+  }) =>
     request<Club>('/api/clubs', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -541,11 +539,12 @@ export const clubsApi = {
 
   // 获取俱乐部列表
   getAll: (search?: string, limit = 20, offset = 0) =>
-    request<Club[]>(`/api/clubs?${search ? `search=${encodeURIComponent(search)}&` : ''}limit=${limit}&offset=${offset}`),
+    request<Club[]>(
+      `/api/clubs?${search ? `search=${encodeURIComponent(search)}&` : ''}limit=${limit}&offset=${offset}`
+    ),
 
   // 获取俱乐部详情
-  getById: (id: string) =>
-    request<Club & { members: ClubMember[] }>(`/api/clubs/${id}`),
+  getById: (id: string) => request<Club & { members: ClubMember[] }>(`/api/clubs/${id}`),
 
   // 更新俱乐部
   update: (id: string, userId: string, data: Partial<Club>) =>
@@ -580,8 +579,7 @@ export const clubsApi = {
     }),
 
   // 获取俱乐部排行榜
-  getLeaderboard: (id: string) =>
-    request<LeaderboardEntry[]>(`/api/clubs/${id}/leaderboard`),
+  getLeaderboard: (id: string) => request<LeaderboardEntry[]>(`/api/clubs/${id}/leaderboard`),
 };
 
 // Analytics 相关类型
@@ -606,26 +604,29 @@ export interface OpponentReport {
 export const analyticsApi = {
   // 获取对手分析
   getOpponentReport: (userId: string, opponentName: string) =>
-    request<OpponentReport>(`/api/analytics/opponent/${userId}/${encodeURIComponent(opponentName)}`),
+    request<OpponentReport>(
+      `/api/analytics/opponent/${userId}/${encodeURIComponent(opponentName)}`
+    ),
 
   // 更新对手分析
   updateOpponentReport: (userId: string, opponentName: string, data: Partial<OpponentReport>) =>
-    request<OpponentReport>(`/api/analytics/opponent/${userId}/${encodeURIComponent(opponentName)}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
+    request<OpponentReport>(
+      `/api/analytics/opponent/${userId}/${encodeURIComponent(opponentName)}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }
+    ),
 
   // 获取所有对手
-  getOpponents: (userId: string) =>
-    request<any[]>(`/api/analytics/opponents/${userId}`),
+  getOpponents: (userId: string) => request<any[]>(`/api/analytics/opponents/${userId}`),
 
   // 获取表现分析
   getPerformance: (userId: string, period?: 'week' | 'month' | 'year') =>
     request<any>(`/api/analytics/performance/${userId}?${period ? `period=${period}` : ''}`),
 
   // 获取技术分析
-  getTechniqueAnalysis: (userId: string) =>
-    request<any>(`/api/analytics/technique/${userId}`),
+  getTechniqueAnalysis: (userId: string) => request<any>(`/api/analytics/technique/${userId}`),
 };
 
 export default {

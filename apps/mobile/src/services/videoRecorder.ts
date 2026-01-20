@@ -73,7 +73,7 @@ export async function getLocalVideos(): Promise<string[]> {
   try {
     await ensureVideoDirectory();
     const files = await FileSystem.readDirectoryAsync(VIDEO_DIRECTORY);
-    return files.filter(f => f.endsWith('.mp4')).map(f => VIDEO_DIRECTORY + f);
+    return files.filter((f) => f.endsWith('.mp4')).map((f) => VIDEO_DIRECTORY + f);
   } catch (error) {
     console.error('Error getting local videos:', error);
     return [];
@@ -84,7 +84,7 @@ export async function getLocalVideos(): Promise<string[]> {
 export async function cleanupOldVideos(daysToKeep: number = 7): Promise<number> {
   try {
     const videos = await getLocalVideos();
-    const cutoffTime = Date.now() - (daysToKeep * 24 * 60 * 60 * 1000);
+    const cutoffTime = Date.now() - daysToKeep * 24 * 60 * 60 * 1000;
     let deletedCount = 0;
 
     for (const videoPath of videos) {

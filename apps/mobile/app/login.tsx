@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../src/stores/authStore';
@@ -78,20 +87,17 @@ export default function LoginScreen() {
             onPress={handleLogin}
             disabled={isLoading}
           >
-            <Text style={styles.loginButtonText}>
-              {isLoading ? '登录中...' : '登录 / 注册'}
-            </Text>
+            <Text style={styles.loginButtonText}>{isLoading ? '登录中...' : '登录 / 注册'}</Text>
           </TouchableOpacity>
 
-          <Text style={styles.hint}>
-            首次登录将自动创建账号
-          </Text>
+          <Text style={styles.hint}>首次登录将自动创建账号</Text>
         </View>
 
         {/* 底部协议 */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            登录即表示同意 <Text style={styles.footerLink}>用户协议</Text> 和 <Text style={styles.footerLink}>隐私政策</Text>
+            登录即表示同意 <Text style={styles.footerLink}>用户协议</Text> 和{' '}
+            <Text style={styles.footerLink}>隐私政策</Text>
           </Text>
         </View>
       </KeyboardAvoidingView>

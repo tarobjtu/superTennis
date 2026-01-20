@@ -132,7 +132,12 @@ router.get('/opponents/:userId', async (req: Request, res: Response) => {
 
     for (const match of matchesAsPlayer1) {
       const name = match.player2Name;
-      const current = opponentStats.get(name) || { name, id: match.player2Id || undefined, wins: 0, losses: 0 };
+      const current = opponentStats.get(name) || {
+        name,
+        id: match.player2Id || undefined,
+        wins: 0,
+        losses: 0,
+      };
       if (match.winner === 1) current.wins++;
       else current.losses++;
       opponentStats.set(name, current);
@@ -140,7 +145,12 @@ router.get('/opponents/:userId', async (req: Request, res: Response) => {
 
     for (const match of matchesAsPlayer2) {
       const name = match.player1Name;
-      const current = opponentStats.get(name) || { name, id: match.player1Id || undefined, wins: 0, losses: 0 };
+      const current = opponentStats.get(name) || {
+        name,
+        id: match.player1Id || undefined,
+        wins: 0,
+        losses: 0,
+      };
       if (match.winner === 2) current.wins++;
       else current.losses++;
       opponentStats.set(name, current);
@@ -324,12 +334,12 @@ router.get('/technique/:userId', async (req: Request, res: Response) => {
       sessions: data.sessions,
       totalDuration: data.totalDuration,
       totalShots: data.totalShots,
-      successRate: data.totalShots > 0
-        ? Math.round((data.successfulShots / data.totalShots) * 100)
-        : 0,
-      avgSpeed: data.speeds.length > 0
-        ? Math.round(data.speeds.reduce((a: number, b: number) => a + b, 0) / data.speeds.length)
-        : null,
+      successRate:
+        data.totalShots > 0 ? Math.round((data.successfulShots / data.totalShots) * 100) : 0,
+      avgSpeed:
+        data.speeds.length > 0
+          ? Math.round(data.speeds.reduce((a: number, b: number) => a + b, 0) / data.speeds.length)
+          : null,
     }));
 
     // 识别优势和弱点

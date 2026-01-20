@@ -1,4 +1,13 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState, useCallback } from 'react';
 import { router } from 'expo-router';
@@ -63,18 +72,14 @@ export default function ProfileScreen() {
   }, [calculateStats]);
 
   const handleLogout = () => {
-    Alert.alert(
-      '退出登录',
-      '确定要退出登录吗？',
-      [
-        { text: '取消', style: 'cancel' },
-        {
-          text: '退出',
-          style: 'destructive',
-          onPress: () => logout(),
-        },
-      ]
-    );
+    Alert.alert('退出登录', '确定要退出登录吗？', [
+      { text: '取消', style: 'cancel' },
+      {
+        text: '退出',
+        style: 'destructive',
+        onPress: () => logout(),
+      },
+    ]);
   };
 
   return (
@@ -132,7 +137,12 @@ export default function ProfileScreen() {
           <MenuItem icon="📹" title="比赛录像" onPress={() => router.push('/videos')} />
           <MenuItem icon="⭐" title="精彩集锦" onPress={() => router.push('/highlights')} />
           <MenuItem icon="👥" title="我的好友" onPress={() => router.push('/friends')} />
-          <MenuItem icon="🔔" title="通知消息" onPress={() => router.push('/notifications')} badge={unreadCount} />
+          <MenuItem
+            icon="🔔"
+            title="通知消息"
+            onPress={() => router.push('/notifications')}
+            badge={unreadCount}
+          />
         </View>
 
         <View style={styles.menuSection}>

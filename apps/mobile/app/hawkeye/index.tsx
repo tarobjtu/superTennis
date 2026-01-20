@@ -110,14 +110,9 @@ export default function HawkEyeTestPage() {
       {/* 最后落地判定 */}
       {lastBounce && (
         <View
-          style={[
-            styles.bounceResult,
-            lastBounce.isInBounds ? styles.bounceIn : styles.bounceOut,
-          ]}
+          style={[styles.bounceResult, lastBounce.isInBounds ? styles.bounceIn : styles.bounceOut]}
         >
-          <Text style={styles.bounceText}>
-            {lastBounce.isInBounds ? '✅ IN' : '❌ OUT'}
-          </Text>
+          <Text style={styles.bounceText}>{lastBounce.isInBounds ? '✅ IN' : '❌ OUT'}</Text>
           <Text style={styles.bounceDistance}>
             距边线: {(lastBounce.distanceFromLine / 10).toFixed(1)} cm
           </Text>
@@ -130,18 +125,11 @@ export default function HawkEyeTestPage() {
           style={[styles.button, isDetecting ? styles.buttonStop : styles.buttonStart]}
           onPress={toggleDetection}
         >
-          <Text style={styles.buttonText}>
-            {isDetecting ? '停止检测' : '开始检测'}
-          </Text>
+          <Text style={styles.buttonText}>{isDetecting ? '停止检测' : '开始检测'}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.button, styles.buttonSecondary]}
-          onPress={toggleDebug}
-        >
-          <Text style={styles.buttonTextSecondary}>
-            {showDebug ? '隐藏调试' : '显示调试'}
-          </Text>
+        <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={toggleDebug}>
+          <Text style={styles.buttonTextSecondary}>{showDebug ? '隐藏调试' : '显示调试'}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

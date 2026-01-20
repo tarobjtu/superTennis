@@ -121,10 +121,7 @@ router.post('/update-ratings', async (req: Request, res: Response) => {
     }
 
     // 计算 ELO 变化
-    const { winnerChange, loserChange } = calculateEloChange(
-      winner.rating,
-      loser.rating
-    );
+    const { winnerChange, loserChange } = calculateEloChange(winner.rating, loser.rating);
 
     // 更新评分
     const [updatedWinner, updatedLoser] = await Promise.all([

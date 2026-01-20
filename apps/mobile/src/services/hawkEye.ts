@@ -19,18 +19,18 @@ export interface BallLandingResult {
 export const COURT_DIMENSIONS = {
   // 单打场地
   singles: {
-    length: 23.77,  // 底线到底线
-    width: 8.23,    // 单打边线到边线
+    length: 23.77, // 底线到底线
+    width: 8.23, // 单打边线到边线
   },
   // 双打场地
   doubles: {
     length: 23.77,
-    width: 10.97,   // 双打边线到边线
+    width: 10.97, // 双打边线到边线
   },
   // 发球区
   serviceBox: {
-    length: 6.40,   // 发球线到网
-    width: 4.115,   // 中线到边线
+    length: 6.4, // 发球线到网
+    width: 4.115, // 中线到边线
   },
   // 网高
   netHeight: {
@@ -122,8 +122,11 @@ export function isPointInBounds(
   );
 
   // 判断是否在界内
-  const isIn = point.x >= -halfWidth && point.x <= halfWidth &&
-               point.y >= -halfLength && point.y <= halfLength;
+  const isIn =
+    point.x >= -halfWidth &&
+    point.x <= halfWidth &&
+    point.y >= -halfLength &&
+    point.y <= halfLength;
 
   // 距离为正表示界内，负表示出界
   const distanceFromLine = isIn ? nearest.dist : -Math.abs(nearest.dist);
@@ -186,8 +189,11 @@ export function isServeValid(
     }
   }
 
-  const isIn = landingPoint.x >= targetBox.minX && landingPoint.x <= targetBox.maxX &&
-               landingPoint.y >= targetBox.minY && landingPoint.y <= targetBox.maxY;
+  const isIn =
+    landingPoint.x >= targetBox.minX &&
+    landingPoint.x <= targetBox.maxX &&
+    landingPoint.y >= targetBox.minY &&
+    landingPoint.y <= targetBox.maxY;
 
   // 计算到最近边线的距离
   const distances = [
@@ -211,7 +217,7 @@ export async function analyzeFrame(
   calibration: CalibrationPoint[] | null
 ): Promise<BallLandingResult | null> {
   // 模拟处理延迟
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise((resolve) => setTimeout(resolve, 100));
 
   // 这里是模拟数据，实际应用中需要：
   // 1. 使用 TensorFlow Lite 或 Core ML 加载训练好的模型
