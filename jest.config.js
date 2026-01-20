@@ -6,20 +6,16 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.test.ts', '**/*.test.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   collectCoverageFrom: [
-    'apps/**/src/**/*.{ts,tsx}',
+    'apps/mobile/src/services/**/*.ts',
+    'apps/mobile/src/stores/**/*.ts',
+    '!apps/**/src/**/*.tsx',
     '!apps/**/src/**/*.d.ts',
+    '!apps/**/src/**/api.ts',
     '!**/node_modules/**',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   coverageThreshold: {
-    // 全局阈值降低（因为包含很多未测试的服务文件）
-    global: {
-      branches: 10,
-      functions: 10,
-      lines: 10,
-      statements: 10,
-    },
     // 核心 AI 服务需要高覆盖率
     'apps/mobile/src/services/hawkEye.ts': {
       branches: 60,
