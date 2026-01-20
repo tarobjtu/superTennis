@@ -3,7 +3,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -42,10 +42,12 @@ router.get('/', async (req: Request, res: Response) => {
     });
 
     // 添加排名
-    const leaderboard = users.map((user, index) => ({
-      ...user,
-      rank: Number(offset) + index + 1,
-    }));
+    const leaderboard = users.map(
+      (user: Pick<User, 'id' | 'name' | 'avatar' | 'rating' | 'level'>, index: number) => ({
+        ...user,
+        rank: Number(offset) + index + 1,
+      })
+    );
 
     res.json(leaderboard);
   } catch (error) {
@@ -209,7 +211,7 @@ router.get('/top/:period', async (req: Request, res: Response) => {
     });
 
     // 获取用户详情
-    const userIds = ratingChanges.map((r) => r.userId);
+    const userIds = ratingChanges.map((r: { userId: string }) => r.userId);
     const users = await prisma.user.findMany({
       where: { id: { in: userIds } },
       select: {
@@ -220,13 +222,17 @@ router.get('/top/:period', async (req: Request, res: Response) => {
       },
     });
 
-    const userMap = new Map(users.map((u) => [u.id, u]));
+    const userMap = new Map(
+      users.map((u: Pick<User, 'id' | 'name' | 'avatar' | 'rating'>) => [u.id, u])
+    );
 
-    const topGainers = ratingChanges.map((r, index) => ({
-      rank: index + 1,
-      user: userMap.get(r.userId),
-      totalGain: r._sum.change || 0,
-    }));
+    const topGainers = ratingChanges.map(
+      (r: { userId: string; _sum: { change: number | null } }, index: number) => ({
+        rank: index + 1,
+        user: userMap.get(r.userId),
+        totalGain: r._sum.change || 0,
+      })
+    );
 
     res.json(topGainers);
   } catch (error) {
@@ -269,13 +275,15 @@ router.get('/match/:userId', async (req: Request, res: Response) => {
     });
 
     // 计算预期胜率
-    const suggestions = matchedUsers.map((opponent) => ({
-      ...opponent,
-      expectedWinRate: Math.round(
-        (1 / (1 + Math.pow(10, (opponent.rating - user.rating) / 400))) * 100
-      ),
-      ratingDiff: opponent.rating - user.rating,
-    }));
+    const suggestions = matchedUsers.map(
+      (opponent: Pick<User, 'id' | 'name' | 'avatar' | 'rating' | 'level'>) => ({
+        ...opponent,
+        expectedWinRate: Math.round(
+          (1 / (1 + Math.pow(10, (opponent.rating - user.rating) / 400))) * 100
+        ),
+        ratingDiff: opponent.rating - user.rating,
+      })
+    );
 
     res.json(suggestions);
   } catch (error) {

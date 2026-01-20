@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Match } from '@prisma/client';
 import { z } from 'zod';
 
 const router = Router();
@@ -75,7 +75,7 @@ router.get('/:id/stats', async (req, res) => {
     });
 
     const totalMatches = matches.length;
-    const wins = matches.filter((m) => m.winner === 1).length; // 简化
+    const wins = matches.filter((m: Match) => m.winner === 1).length; // 简化
     const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
 
     res.json({

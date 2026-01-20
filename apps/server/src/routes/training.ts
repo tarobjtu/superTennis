@@ -146,8 +146,16 @@ router.get('/stats/:userId', async (req: Request, res: Response) => {
       },
     });
 
+    // Define type for grouped stats
+    type GroupedStat = {
+      type: string;
+      _count: number;
+      _sum: { duration: number | null; totalShots: number | null; successfulShots: number | null };
+      _avg: { avgSpeed: number | null; maxSpeed: number | null };
+    };
+
     res.json({
-      byType: statsByType.map((stat) => ({
+      byType: statsByType.map((stat: GroupedStat) => ({
         type: stat.type,
         typeInfo: TRAINING_TYPES[stat.type as keyof typeof TRAINING_TYPES],
         sessionCount: stat._count,

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, MatchInvite, User } from '@prisma/client';
 import { z } from 'zod';
 
 const router = Router();
@@ -51,14 +51,14 @@ router.get('/received/:userId', async (req, res) => {
     });
 
     // 获取邀请者信息
-    const inviterIds = invites.map((i) => i.inviterId);
+    const inviterIds = invites.map((i: MatchInvite) => i.inviterId);
     const inviters = await prisma.user.findMany({
       where: { id: { in: inviterIds } },
     });
 
-    const result = invites.map((invite) => ({
+    const result = invites.map((invite: MatchInvite) => ({
       ...invite,
-      inviter: inviters.find((u) => u.id === invite.inviterId),
+      inviter: inviters.find((u: User) => u.id === invite.inviterId),
     }));
 
     res.json(result);
@@ -77,14 +77,14 @@ router.get('/sent/:userId', async (req, res) => {
     });
 
     // 获取被邀请者信息
-    const inviteeIds = invites.map((i) => i.inviteeId);
+    const inviteeIds = invites.map((i: MatchInvite) => i.inviteeId);
     const invitees = await prisma.user.findMany({
       where: { id: { in: inviteeIds } },
     });
 
-    const result = invites.map((invite) => ({
+    const result = invites.map((invite: MatchInvite) => ({
       ...invite,
-      invitee: invitees.find((u) => u.id === invite.inviteeId),
+      invitee: invitees.find((u: User) => u.id === invite.inviteeId),
     }));
 
     res.json(result);

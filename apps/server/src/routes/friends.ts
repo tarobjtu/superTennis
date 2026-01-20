@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Friendship, User } from '@prisma/client';
 import { z } from 'zod';
 
 const router = Router();
@@ -101,7 +101,9 @@ router.get('/list/:userId', async (req, res) => {
     });
 
     // 获取好友的用户信息
-    const friendIds = friendships.map((f) => (f.userId === userId ? f.friendId : f.userId));
+    const friendIds = friendships.map((f: Friendship) =>
+      f.userId === userId ? f.friendId : f.userId
+    );
 
     const friends = await prisma.user.findMany({
       where: { id: { in: friendIds } },
@@ -128,12 +130,12 @@ router.get('/pending/:userId', async (req, res) => {
 
     // 获取请求者信息
     const requesters = await prisma.user.findMany({
-      where: { id: { in: requests.map((r) => r.userId) } },
+      where: { id: { in: requests.map((r: Friendship) => r.userId) } },
     });
 
-    const result = requests.map((r) => ({
+    const result = requests.map((r: Friendship) => ({
       ...r,
-      requester: requesters.find((u) => u.id === r.userId),
+      requester: requesters.find((u: User) => u.id === r.userId),
     }));
 
     res.json(result);

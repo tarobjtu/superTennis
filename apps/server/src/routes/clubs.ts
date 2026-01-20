@@ -3,7 +3,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ClubMember, Club, User } from '@prisma/client';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -86,7 +86,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     });
 
     // 获取成员详情
-    const memberIds = members.map((m) => m.userId);
+    const memberIds = members.map((m: ClubMember) => m.userId);
     const users = await prisma.user.findMany({
       where: { id: { in: memberIds } },
       select: {
@@ -98,9 +98,11 @@ router.get('/:id', async (req: Request, res: Response) => {
       },
     });
 
-    const userMap = new Map(users.map((u) => [u.id, u]));
+    const userMap = new Map(
+      users.map((u: Pick<User, 'id' | 'name' | 'avatar' | 'rating' | 'level'>) => [u.id, u])
+    );
 
-    const membersWithInfo = members.map((m) => ({
+    const membersWithInfo = members.map((m: ClubMember) => ({
       ...m,
       user: userMap.get(m.userId),
     }));
@@ -231,18 +233,21 @@ router.get('/user/:userId', async (req: Request, res: Response) => {
       where: { userId },
     });
 
-    const clubIds = memberships.map((m) => m.clubId);
+    const clubIds = memberships.map((m: ClubMember) => m.clubId);
     const clubs = await prisma.club.findMany({
       where: { id: { in: clubIds } },
     });
 
-    const clubMap = new Map(clubs.map((c) => [c.id, c]));
+    const clubMap = new Map(clubs.map((c: Club) => [c.id, c]));
 
-    const result = memberships.map((m) => ({
-      ...clubMap.get(m.clubId),
-      role: m.role,
-      joinedAt: m.joinedAt,
-    }));
+    const result = memberships.map((m: ClubMember) => {
+      const club = clubMap.get(m.clubId);
+      return {
+        ...club,
+        role: m.role,
+        joinedAt: m.joinedAt,
+      };
+    });
 
     res.json(result);
   } catch (error) {
@@ -288,7 +293,7 @@ router.get('/:id/leaderboard', async (req: Request, res: Response) => {
       where: { clubId: id },
     });
 
-    const memberIds = members.map((m) => m.userId);
+    const memberIds = members.map((m: ClubMember) => m.userId);
 
     // 获取成员详情和评分
     const users = await prisma.user.findMany({
@@ -303,10 +308,12 @@ router.get('/:id/leaderboard', async (req: Request, res: Response) => {
       },
     });
 
-    const leaderboard = users.map((user, index) => ({
-      rank: index + 1,
-      ...user,
-    }));
+    const leaderboard = users.map(
+      (user: Pick<User, 'id' | 'name' | 'avatar' | 'rating' | 'level'>, index: number) => ({
+        rank: index + 1,
+        ...user,
+      })
+    );
 
     res.json(leaderboard);
   } catch (error) {
