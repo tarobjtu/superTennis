@@ -45,6 +45,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate Prisma client
+        run: cd apps/server && npx prisma generate
+
       - name: Run TypeScript check
         run: npm run typecheck
 
