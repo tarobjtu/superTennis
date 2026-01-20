@@ -22,6 +22,7 @@
     "expo-linking": "~8.0.11",
     "expo-media-library": "~18.2.1",
     "expo-notifications": "~0.32.16",
+    "expo-localization": "~17.0.8",
     "expo-router": "~6.0.21",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
